@@ -39,7 +39,7 @@ ARCHITECTURE behavior OF bit_send_tb IS
 
     -- Component Declaration for the Unit Under Test (UUT)
 
-    COMPONENT bit_transfer
+    COMPONENT bit_send
     PORT(
          CLK_IN : IN  std_logic;
          RST_IN : IN  std_logic;
@@ -75,7 +75,7 @@ ARCHITECTURE behavior OF bit_send_tb IS
 BEGIN
 
   -- Instantiate the Unit Under Test (UUT)
-   uut: bit_transfer PORT MAP (
+   uut: bit_send PORT MAP (
           CLK_IN => CLK_IN,
           RST_IN => RST_IN,
           START_IN => START_IN,
