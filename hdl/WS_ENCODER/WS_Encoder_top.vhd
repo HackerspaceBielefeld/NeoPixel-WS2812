@@ -31,6 +31,8 @@ entity WS_Encoder_top is
     M_RD_OUT    : out std_logic;
     
     M_ADR_OUT   : out std_logic_vector(7 downto 0);
-    M_DATA_IN   : in  std_logic_vector(7 downto 0) 
+    M_DATA_IN   : in  std_logic_vector(7 downto 0);
+    
+    PIXEL_OUT   : out std_logic
   );
 end WS_Encoder_top;

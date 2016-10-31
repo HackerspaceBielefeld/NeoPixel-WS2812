@@ -32,7 +32,7 @@ entity SPI_top is
     CS_IN       : in  std_logic;
     SCLK_IN     : in  std_logic;
     MOSI_IN     : in  std_logic;
-    MISO_O      : out std_logic;
+    MISO_OUT    : out std_logic;
     
     INT_OUT     : out std_logic
   );

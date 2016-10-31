@@ -19,9 +19,6 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity BIUI_top is
   port(
-    CLK_IN      : in  std_logic;
-    RST_IN      : in  std_logic;
-    
     M_RD_IN     : in  std_logic;
     M_WR_IN     : in  std_logic;
     
