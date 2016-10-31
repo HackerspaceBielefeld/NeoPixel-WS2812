@@ -72,12 +72,12 @@ begin
 
         if  (BIT_IN = '0' and inc_c_cnt = unsigned(STP_0H_IN)) or
             (BIT_IN = '1' and inc_c_cnt = unsigned(STP_1H_IN)) then
-          NB_OUT  <=  '1';
           n_state <=  LOW_S;
         end if;
 
       when LOW_S =>
         if inc_c_cnt = unsigned(SEQ_STP_IN) then
+          NB_OUT  <=  '1';
           if START_IN = '1' then
             n_cnt   <=  (others=>'0');
             n_state <=  HIGH_S;
@@ -86,7 +86,6 @@ begin
           end if;
         end if;
 
-      when others =>
     end case;
   end process;
 
