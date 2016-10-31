@@ -22,6 +22,9 @@ entity Controller_top is
     CLK_IN      : in  std_logic;
     RST_IN      : in  std_logic;
     
+    INT0_IN     : in  std_logic;
+    INT1_IN     : in  std_logic;
+    
     A_RD_OUT    : out  std_logic;
     A_WR_OUT    : out  std_logic;
     

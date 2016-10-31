@@ -125,6 +125,10 @@ architecture RTL of NeoPixel_top is
       CLK_IN      : in  std_logic;
       RST_IN      : in  std_logic;
       
+      --Interrups from COMs
+      INT0_IN     : in  std_logic;
+      INT1_IN     : in  std_logic;
+    
       --Bus interface to serial com ports
       A_RD_OUT    : out  std_logic;
       A_WR_OUT    : out  std_logic;
@@ -316,7 +320,7 @@ begin
 
     S0_ADR_OUT  =>  SPI_adr,
     S0_DATA_OUT =>  SPI_din,
-    S0_DATA_in  =>  UART_dout,
+    S0_DATA_in  =>  SPI_dout,
 
     S1_RD_OUT   =>  UART_rd,
     S1_WR_OUT   =>  UART_wr,
@@ -329,6 +333,9 @@ begin
   Controller: Controller_top port map(
     CLK_IN      =>  CLK_IN,
     RST_IN      =>  reset,
+    
+    INT0_IN     =>  SPI_int,
+    INT1_IN     =>  UART_int,
       
     A_RD_OUT    =>  BIUI_rd,
     A_WR_OUT    =>  BIUI_wr,
