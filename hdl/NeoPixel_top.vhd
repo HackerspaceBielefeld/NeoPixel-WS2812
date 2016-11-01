@@ -53,7 +53,7 @@ architecture RTL of NeoPixel_top is
       RD_IN       : in  std_logic;
       WR_IN       : in  std_logic;
       
-      ADR_IN      : in  std_logic_vector(7 downto 0);
+      ADR_IN      : in  std_logic_vector(2 downto 0);
       DATA_IN     : in  std_logic_vector(7 downto 0);
       DATA_OUT    : out std_logic_vector(7 downto 0);
       
@@ -113,7 +113,7 @@ architecture RTL of NeoPixel_top is
       S1_RD_OUT   : out std_logic;
       S1_WR_OUT   : out std_logic;
   
-      S1_ADR_OUT  : out std_logic_vector(7 downto 0);
+      S1_ADR_OUT  : out std_logic_vector(2 downto 0);
       S1_DATA_OUT : out std_logic_vector(7 downto 0);
       S1_DATA_in  : in  std_logic_vector(7 downto 0) 
     );
@@ -223,7 +223,7 @@ architecture RTL of NeoPixel_top is
   signal UART_rd    : std_logic;
   signal UART_wr    : std_logic;
   signal UART_int   : std_logic;
-  signal UART_adr   : std_logic_vector(7 downto 0);
+  signal UART_adr   : std_logic_vector(2 downto 0);
   signal UART_din   : std_logic_vector(7 downto 0);
   signal UART_dout  : std_logic_vector(7 downto 0);
   
