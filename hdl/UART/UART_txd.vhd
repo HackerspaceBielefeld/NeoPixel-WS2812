@@ -40,9 +40,9 @@ entity UART_txd is
 
     TX_ENA_IN     : in  std_logic;
     
-    DTA_RD_IN     : in  std_logic;
-
+    DTA_RDY_IN    : in  std_logic;
     DTA_IN        : in  std_logic_vector( 7 downto 0);
+    
     BAUDRATE_IN   : in  std_logic_vector(15 downto 0);
 
     DTA_RD_OUT    : out std_logic;
@@ -86,11 +86,11 @@ begin
     port map(
       CLK_IN        =>  CLK_IN,
       CNT_EN_IN     =>  pic_en,
-      LOAD_IN       =>  PIC_LOAD_IN,
+      LOAD_IN       =>  BAUDRATE_IN,
       TICK_OUT      =>  pic_tick
     );
 
-  txd_logic:  process(c_tx_state, c_tx_dta, c_bit_cnt, pic_tick, DTA_RD_IN, DTA_IN)
+  txd_logic:  process(c_tx_state, c_tx_dta, c_bit_cnt, pic_tick, DTA_RDY_IN, DTA_IN)
   begin
     n_tx_state  <=  c_tx_state;
     n_tx_dta    <=  c_tx_dta;
@@ -104,7 +104,7 @@ begin
       when IDLE =>
         TX_IDLE_OUT   <=  '1';
         pic_en   <=  '0';
-        if DTA_RD_IN = '1' then
+        if DTA_RDY_IN = '1' then
           n_tx_state  <= START;
         end if;
 
@@ -128,7 +128,7 @@ begin
 
       when STOP =>
         if pic_tick = '1' then
-          if DTA_RD_IN = '1' then
+          if DTA_RDY_IN = '1' then
             n_tx_state  <= START;
           else
             n_tx_state  <= IDLE;
