@@ -25,7 +25,7 @@ entity SPI_top is
     RD_IN       : in  std_logic;
     WR_IN       : in  std_logic;
     
-    ADR_IN      : in  std_logic_vector(7 downto 0);
+    ADR_IN      : in  std_logic_vector(2 downto 0);
     DATA_IN     : in  std_logic_vector(7 downto 0);
     DATA_OUT    : out std_logic_vector(7 downto 0);
     

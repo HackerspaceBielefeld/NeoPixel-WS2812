@@ -76,7 +76,7 @@ architecture RTL of NeoPixel_top is
       RD_IN       : in  std_logic;
       WR_IN       : in  std_logic;
       
-      ADR_IN      : in  std_logic_vector(7 downto 0);
+      ADR_IN      : in  std_logic_vector(2 downto 0);
       DATA_IN     : in  std_logic_vector(7 downto 0);
       DATA_OUT    : out std_logic_vector(7 downto 0);
       
@@ -97,7 +97,7 @@ architecture RTL of NeoPixel_top is
       M_RD_IN     : in  std_logic;
       M_WR_IN     : in  std_logic;
       
-      M_ADR_IN    : in  std_logic_vector(7 downto 0);
+      M_ADR_IN    : in  std_logic_vector(3 downto 0);
       M_DATA_IN   : in  std_logic_vector(7 downto 0);
       M_DATA_OUT  : out std_logic_vector(7 downto 0);
       
@@ -105,7 +105,7 @@ architecture RTL of NeoPixel_top is
       S0_RD_OUT   : out std_logic;
       S0_WR_OUT   : out std_logic;
   
-      S0_ADR_OUT  : out std_logic_vector(7 downto 0);
+      S0_ADR_OUT  : out std_logic_vector(2 downto 0);
       S0_DATA_OUT : out std_logic_vector(7 downto 0);
       S0_DATA_in  : in  std_logic_vector(7 downto 0);
       
@@ -133,7 +133,7 @@ architecture RTL of NeoPixel_top is
       A_RD_OUT    : out  std_logic;
       A_WR_OUT    : out  std_logic;
       
-      A_ADR_OUT   : out std_logic_vector(7 downto 0);
+      A_ADR_OUT   : out std_logic_vector(3 downto 0);
       A_DATA_OUT  : out std_logic_vector(7 downto 0);
       A_DATA_IN   : in  std_logic_vector(7 downto 0);
       
@@ -231,14 +231,14 @@ architecture RTL of NeoPixel_top is
   signal SPI_rd     : std_logic;
   signal SPI_wr     : std_logic;
   signal SPI_int    : std_logic;
-  signal SPI_adr    : std_logic_vector(7 downto 0);
+  signal SPI_adr    : std_logic_vector(2 downto 0);
   signal SPI_din    : std_logic_vector(7 downto 0);
   signal SPI_dout   : std_logic_vector(7 downto 0);
 
   --BIUI-Controller-lines
   signal BIUI_rd    : std_logic;
   signal BIUI_wr    : std_logic;
-  signal BIUI_adr   : std_logic_vector(7 downto 0);
+  signal BIUI_adr   : std_logic_vector(3 downto 0);
   signal BIUI_din   : std_logic_vector(7 downto 0);
   signal BIUI_dout  : std_logic_vector(7 downto 0);
 
