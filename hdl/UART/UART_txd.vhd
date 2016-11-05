@@ -36,15 +36,17 @@ use work.pic_pkg.all;
 entity UART_txd is
   port(
     CLK_IN        : in  std_logic;
-    RESET_IN      : in  std_logic;
+    RST_IN        : in  std_logic;
 
-    TE_IN         : in  std_logic;
-    TDE_IN        : in  std_logic;
+    TX_ENA_IN     : in  std_logic;
+    
+    DTA_RD_IN     : in  std_logic;
 
-    DATA_IN       : in  std_logic_vector( 7 downto 0);
-    BOUDRATE_IN   : in  std_logic_vector(15 downto 0);
+    DTA_IN        : in  std_logic_vector( 7 downto 0);
+    BAUDRATE_IN   : in  std_logic_vector(15 downto 0);
 
-    TC_OUT        : out std_logic;
+    DTA_RD_OUT    : out std_logic;
+    TX_IDLE_OUT   : out std_logic;
 
     TXD_OUT       : out std_logic
   );
@@ -88,30 +90,30 @@ begin
       TICK_OUT      =>  pic_tick
     );
 
-  txd_logic:  process(c_tx_state, c_tx_dta, c_bit_cnt, fifo_empty, fifo_dout, pic_tick, TX_ENABLE_IN)
+  txd_logic:  process(c_tx_state, c_tx_dta, c_bit_cnt, pic_tick, DTA_RD_IN, DTA_IN)
   begin
     n_tx_state  <=  c_tx_state;
     n_tx_dta    <=  c_tx_dta;
-    TX_BUSY_OUT <=  '1';
+    TX_IDLE_OUT <=  '0';
     TXD_OUT     <=  '1';
     pic_en      <=  '1';
-    fifo_rd     <=  '0';
+    DTA_RD_OUT  <=  '0';
     n_bit_cnt   <=  c_bit_cnt;
 
     case c_tx_state is
       when IDLE =>
-        TX_BUSY_OUT   <=  '0';
+        TX_IDLE_OUT   <=  '1';
         pic_en   <=  '0';
-        if TX_ENABLE_IN = '1' and fifo_empty = '0' then
+        if DTA_RD_IN = '1' then
           n_tx_state  <= START;
         end if;
 
       when START =>
         TXD_OUT   <=  '0';
-        n_tx_dta  <=  fifo_dout;
+        n_tx_dta  <=  DTA_IN;
         if pic_tick = '1' then
           n_tx_state  <=  TRANSMIT;
-          fifo_rd     <=  '1';
+          DTA_RD_OUT  <=  '1';
         end if;
 
       when TRANSMIT =>
@@ -126,7 +128,7 @@ begin
 
       when STOP =>
         if pic_tick = '1' then
-          if TX_ENABLE_IN = '1' and fifo_empty = '0' then
+          if DTA_RD_IN = '1' then
             n_tx_state  <= START;
           else
             n_tx_state  <= IDLE;
@@ -139,11 +141,11 @@ begin
   reg : process(CLK_IN)
   begin
     if rising_edge(CLK_IN) then
-      if RESET_IN = '1' then
+      if RST_IN = '1' then
         c_tx_state  <=  IDLE;
         c_bit_cnt   <=  0;
         c_tx_dta    <= (others => '-');
-      elsif TX_ENABLE_IN = '1' then
+      elsif TX_ENA_IN = '1' then
         c_tx_state  <=  n_tx_state;
         c_bit_cnt   <=  n_bit_cnt;
         c_tx_dta    <=  n_tx_dta;

@@ -64,27 +64,72 @@ end UART_top;
 
 architecture RTL of UART_top is
 
+  component UART_rxd is
+    port(
+      CLK_IN        : in  std_logic;
+      RST_IN        : in  std_logic;
+      
+      RX_ENA_IN     : in  std_logic;
+      
+      BAUDRATE_IN   : in  std_logic_vector(15 downto 0);
+      
+      RXD_IN        : in  std_logic;
+      
+      DTA_WR_OUT    : out std_logic;
+      DTA_OUT       : out std_logic_vector( 7 downto 0);
+      
+      RX_IDLE_OUT   : out std_logic
+    );
+  end component;
+  
   signal cTDR, nTDR   : std_logic_vector(7 downto 0); --TransmitDataRegister
   signal cRDR, nRDR   : std_logic_vector(7 downto 0); --ReceiveDataRegister
   signal cCSR, nCSR   : std_logic_vector(7 downto 0); --Control/StatusRegister
   signal cBLR, nBLR   : std_logic_vector(7 downto 0); --BaudrateLowbyteRegister
   signal cBHR, nBHR   : std_logic_vector(7 downto 0); --BaudrateHighbyteRegister
   signal cIER, nIER   : std_logic_vector(2 downto 0); --InterruptEnableRegister
+  
+  signal rxd_idle     : std_logic;
+  signal rxd_wr       : std_logic;
+  signal rxd_dta      : std_logic_vector(7 downto 0);
 
 begin
   
+  receiver: UART_rxd 
+    port map(
+      CLK_IN      =>  CLK_IN,
+      RST_IN      =>  RST_IN,
+      RX_ENA_IN   =>  cCSR(2) and cCSR(0),
+      BAUDRATE_IN =>  (cBHR & cBLR),
+      RXD_IN      =>  RXD_IN,
+      DTA_WR_OUT 	=>  rxd_wr,
+      DTA_OUT     =>  rxd_dta,
+      RX_IDLE_OUT =>  rxd_idle
+    );
+    
   INT_OUT <=  cIER(0) and ((cIER(1) and cCSR(3)) or (cIER(2) and cCSR(4)));
   
-  decoder: process(ADR_IN, RD_IN, WR_IN, DATA_IN,
-                   cTDR, cRDR, cCSR, cBLR, cBHR, cIER)
+  decoder: process(ADR_IN, RD_IN, WR_IN, DATA_IN, rxd_idle, rxd_wr,
+                   rxd_dta, cTDR, cRDR, cCSR, cBLR, cBHR, cIER)
   begin
     
     nTDR  <=  cTDR;
-    nRDR  <=  cRDR;
     nCSR  <=  cCSR;
     nBLR  <=  cBLR;
     nBHR  <=  cBHR;
     nIER  <=  cIER;
+    
+    nCSR(6)  <= rxd_idle;
+    
+    if rxd_wr = '1' then
+      nRDR    <=  rxd_dta;
+      nCSR(4) <=  '1';
+      if cCSR(4) = '1' then
+        nCSR(7) <=  '1';
+      end if;
+    else
+      nRDR  <= cRDR;
+    end if;
     
     DATA_OUT  <=  "--------";
     
@@ -94,6 +139,7 @@ begin
         
         if RD_IN = '1' then
           nCSR(4) <=  '0';
+          nCSR(7) <=  '0';
         end if;
         
         if WR_IN = '1' then
