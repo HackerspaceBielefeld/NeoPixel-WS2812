@@ -140,7 +140,7 @@ architecture RTL of NeoPixel_top is
       --Bus interface to MMU and WS-driver
       B_WR_OUT    : out std_logic;
       
-      B_ADR_OUT   : out std_logic_vector(7 downto 0);
+      B_ADR_OUT   : out std_logic_vector(11 downto 0);
       B_DATA_OUT  : out std_logic_vector(7 downto 0);
       B_DATA_IN   : in  std_logic_vector(7 downto 0) 
     );
@@ -151,21 +151,21 @@ architecture RTL of NeoPixel_top is
       --Master bus interface
       M_WR_IN     : in  std_logic;
       
-      M_ADR_IN    : in  std_logic_vector(7 downto 0);
+      M_ADR_IN    : in  std_logic_vector(11 downto 0);
       M_DATA_IN   : in  std_logic_vector(7 downto 0);
       M_DATA_OUT  : out std_logic_vector(7 downto 0);
       
       --Bus interface to slave 0 (MMU)
       S0_WR_OUT   : out std_logic;
   
-      S0_ADR_OUT  : out std_logic_vector(7 downto 0);
+      S0_ADR_OUT  : out std_logic_vector(10 downto 0);
       S0_DATA_OUT : out std_logic_vector(7 downto 0);
       S0_DATA_in  : in  std_logic_vector(7 downto 0);
       
       --Bus interface to slave 1 (WS_Encoder)
       S1_WR_OUT   : out std_logic;
   
-      S1_ADR_OUT  : out std_logic_vector(7 downto 0);
+      S1_ADR_OUT  : out std_logic_vector(10 downto 0);
       S1_DATA_OUT : out std_logic_vector(7 downto 0);
       S1_DATA_in  : in  std_logic_vector(7 downto 0) 
     );
@@ -180,7 +180,7 @@ architecture RTL of NeoPixel_top is
       --Bus interface
       WR_IN       : in  std_logic;
       
-      ADR_IN      : in  std_logic_vector(7 downto 0);
+      ADR_IN      : in  std_logic_vector(10 downto 0);
       DATA_IN     : in  std_logic_vector(7 downto 0);
       DATA_OUT    : out std_logic_vector(7 downto 0);
       
@@ -201,7 +201,7 @@ architecture RTL of NeoPixel_top is
       --Bus interface
       WR_IN       : in  std_logic;
       
-      ADR_IN      : in  std_logic_vector(7 downto 0);
+      ADR_IN      : in  std_logic_vector(10 downto 0);
       DATA_IN     : in  std_logic_vector(7 downto 0);
       DATA_OUT    : out std_logic_vector(7 downto 0);
       
@@ -244,13 +244,13 @@ architecture RTL of NeoPixel_top is
 
   --BIUO-Controller-lines
   signal BIUO_wr    : std_logic;
-  signal BIUO_adr   : std_logic_vector(7 downto 0);
+  signal BIUO_adr   : std_logic_vector(11 downto 0);
   signal BIUO_din   : std_logic_vector(7 downto 0);
   signal BIUO_dout  : std_logic_vector(7 downto 0);
 
   --MMU-BIUO-lines
   signal MMU_wr     : std_logic;
-  signal MMU_adr    : std_logic_vector(7 downto 0);
+  signal MMU_adr    : std_logic_vector(10 downto 0);
   signal MMU_din    : std_logic_vector(7 downto 0);
   signal MMU_dout   : std_logic_vector(7 downto 0);
   
@@ -261,7 +261,7 @@ architecture RTL of NeoPixel_top is
   
   --WS-BIUO-lines
   signal WS_wr      : std_logic;
-  signal WS_adr     : std_logic_vector(7 downto 0);
+  signal WS_adr     : std_logic_vector(10 downto 0);
   signal WS_din     : std_logic_vector(7 downto 0);
   signal WS_dout    : std_logic_vector(7 downto 0);
   
