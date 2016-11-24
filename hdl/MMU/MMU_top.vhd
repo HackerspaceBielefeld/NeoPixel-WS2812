@@ -30,7 +30,7 @@ entity MMU_top is
     
     M_RD_IN     : in  std_logic;
     
-    M_ADR_IN    : in  std_logic_vector(7 downto 0);
-    M_DATA_OUT  : out std_logic_vector(7 downto 0) 
+    M_ADR_IN    : in  std_logic_vector(8 downto 0);
+    M_DATA_OUT  : out std_logic_vector(23 downto 0) 
   );
 end MMU_top;

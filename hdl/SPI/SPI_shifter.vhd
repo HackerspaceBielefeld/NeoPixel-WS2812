@@ -61,7 +61,8 @@ begin
   nSckSr    <=  cSckSr(1 downto 0) & SCK_IN;
   nMosiSr   <=  cMosiSr(0) & MOSI_IN;
   
-  MISO_OUT  <=  cTxDta(7);
+  --MISO_OUT is Tri-State when SPI is disabled.
+  MISO_OUT  <=  cTxDta(7) when ENA_IN = '1' else 'Z';
   DATA_OUT  <=  cRxDta;
 
   logic: process(cRxDta, cTxDta, cSckSr, cMosiSr, cSrCnt, SCK_IN, MOSI_IN, fEdge, rEdge, cState, DATA_IN, ENA_IN)
@@ -101,7 +102,9 @@ begin
           end if;
         else
           nState    <= IDLE;
-          ABORT_OUT <=  '1';
+          if cSrCnt /= 7 then
+            ABORT_OUT <=  '1';
+          end if;
         end if;
       
     end case;

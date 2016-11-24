@@ -187,8 +187,8 @@ architecture RTL of NeoPixel_top is
       --WS_Encoder interface
       M_RD_IN     : in  std_logic;
       
-      M_ADR_IN    : in  std_logic_vector(7 downto 0);
-      M_DATA_OUT  : out std_logic_vector(7 downto 0) 
+      M_ADR_IN    : in  std_logic_vector(8 downto 0);
+      M_DATA_OUT  : out std_logic_vector(23 downto 0) 
     );
   end component;
 
@@ -208,8 +208,8 @@ architecture RTL of NeoPixel_top is
       --MMU interface
       M_RD_OUT    : out std_logic;
       
-      M_ADR_OUT   : out std_logic_vector(7 downto 0);
-      M_DATA_IN   : in  std_logic_vector(7 downto 0);
+      M_ADR_OUT   : out std_logic_vector(8 downto 0);
+      M_DATA_IN   : in  std_logic_vector(23 downto 0);
       
       --LED data out
       PIXEL_OUT   : out std_logic
@@ -256,8 +256,8 @@ architecture RTL of NeoPixel_top is
   
   --MMU-WS_Encoder-lines
   signal MMU_WS_rd  : std_logic;
-  signal MMU_WS_adr : std_logic_vector(7 downto 0);
-  signal MMU_WS_dta : std_logic_vector(7 downto 0);
+  signal MMU_WS_adr : std_logic_vector(8 downto 0);
+  signal MMU_WS_dta : std_logic_vector(23 downto 0);
   
   --WS-BIUO-lines
   signal WS_wr      : std_logic;
