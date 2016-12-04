@@ -13,14 +13,13 @@
 --    Register map:
 --    ADR     R/W     DESC
 --     0      R/W     Control/Status register.
---     2      R/W     T1H cnt.
---     3      R/W     T0H cnt.
---     4      R/W     T1L cnt.
---     5      R/W     T0L cnt.
---     6      R/W     Reset cnt low.
---     7      R/W     Reset cnt high.
---     8      R/W     Num LED low.
---     9      R/W     Num LED high.
+--     1      R/W     T1H cnt.
+--     2      R/W     T1L cnt.
+--     3      R/W     TBit cnt.
+--     4      R/W     Reset cnt low.
+--     5      R/W     Reset cnt high.
+--     6      R/W     Num LED low.
+--     7      R/W     Num LED high.
 --
 --    Control/Status register
 --    BIT   VAL   R/W   DESC

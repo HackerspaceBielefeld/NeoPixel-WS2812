@@ -201,7 +201,7 @@ architecture RTL of NeoPixel_top is
       --Bus interface
       WR_IN       : in  std_logic;
       
-      ADR_IN      : in  std_logic_vector(10 downto 0);
+      ADR_IN      : in  std_logic_vector(7 downto 0);
       DATA_IN     : in  std_logic_vector(7 downto 0);
       DATA_OUT    : out std_logic_vector(7 downto 0);
       
@@ -393,7 +393,7 @@ begin
 
     WR_IN       =>  WS_wr,
 
-    ADR_IN      =>  WS_adr,
+    ADR_IN      =>  WS_adr(7 downto 0),
     DATA_IN     =>  WS_din,
     DATA_OUT    =>  WS_dout,
 
