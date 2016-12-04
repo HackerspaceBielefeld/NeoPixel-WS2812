@@ -39,3 +39,11 @@ entity Controller_top is
     B_DATA_IN   : in  std_logic_vector(7 downto 0) 
   );
 end Controller_top;
+
+architecture RTL of Controller_top is
+
+begin
+
+
+
+end RTL;
