@@ -81,12 +81,17 @@ architecture RTL of WS_Encoder_top is
   
   signal cRstCntL, nRstCntL       : std_logic_vector(7 downto 0); --Clocks for reset pulse, low-byte
   signal cRstCntH, nRstCntH       : std_logic_vector(7 downto 0); --Clocks for reset pulse, high-byte
+  signal rstCnt                   : std_logic_vector(15 downto 0);
   
   signal cLedCntL, nLedCntL       : std_logic_vector(7 downto 0); --Amount of LEDs - 1, low-byte
   signal cLedCntH, nLedCntH       : std_logic_vector(7 downto 0); --Amount of LEDs - 1, high-byte
+  signal ledCnt                   : std_logic_vector(8 downto 0); --Amount of LEDs - 1, high-byte
 
 begin
 
+  rstCnt  <=  cRstCntH & cRstCntL;
+  ledCnt  <=  cLedCntH(0) & cLedCntL;
+  
   encoder: WS_engine port map(
     CLK_IN      =>  CLK_IN,
     RST_IN      =>  RST_IN,
@@ -94,8 +99,8 @@ begin
     T1H_IN      =>  cT1H_Steps,
     T0H_IN      =>  cT0H_Steps,
     BIT_SEQ_IN  =>  cBitSteps,
-    RST_CNT_IN  =>  cRstCntH & cRstCntL,
-    LED_CNT_IN  =>  cLedCntH(0) & cLedCntL,
+    RST_CNT_IN  =>  rstCnt,
+    LED_CNT_IN  =>  ledCnt,
     ADR_OUT     =>  M_ADR_OUT,
     DATA_IN     =>  M_DATA_IN,
     PIXEL_OUT   =>  PIXEL_OUT

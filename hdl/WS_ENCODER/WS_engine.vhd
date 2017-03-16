@@ -130,7 +130,7 @@ begin
         nBitSeq <=  cBitSeq + 1;
         if cBitSeq = bitSeq then
           nBitSeq <=  (others => '0');
-          if cLedCnt = ledCnt then
+          if cLedCnt = ledCnt + 1 and cNumBit = 23 then
             nState  <=  RST;
             nLedCnt <=  (others => '0');
           else
@@ -162,7 +162,7 @@ begin
         cBitSeq <=  nBitSeq;
         cLedCnt <=  nLedCnt;     
         cRstCnt <=  nRstCnt;
-				cNumBit	<=	nNumBit;
+        cNumBit <=  nNumBit;
         cData   <=  nData;
         cState  <=  nState;
       end if;
