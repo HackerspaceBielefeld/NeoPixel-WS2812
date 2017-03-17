@@ -38,12 +38,10 @@ entity WS_Encoder_top is
     
     WR_IN       : in  std_logic;
     
-    ADR_IN      : in  std_logic_vector(7 downto 0);
+    ADR_IN      : in  std_logic_vector(2 downto 0);
     DATA_IN     : in  std_logic_vector(7 downto 0);
     DATA_OUT    : out std_logic_vector(7 downto 0);
-    
-    M_RD_OUT    : out std_logic;
-    
+        
     M_ADR_OUT   : out std_logic_vector(8 downto 0);
     M_DATA_IN   : in  std_logic_vector(23 downto 0);
     
@@ -73,7 +71,7 @@ architecture RTL of WS_Encoder_top is
     );
   end component;
   
-  signal cCSR, nCSR               : std_logic_vector(7 downto 0); --Control/Status-Register
+  signal cCSR, nCSR               : std_logic_vector(1 downto 0); --Control/Status-Register
   
   signal cT1H_Steps, nT1H_Steps   : std_logic_vector(7 downto 0); --High-time in clocks for 1-bits
   signal cT0H_Steps, nT0H_Steps   : std_logic_vector(7 downto 0); --High-time in clocks for 0-bits
@@ -84,13 +82,13 @@ architecture RTL of WS_Encoder_top is
   signal rstCnt                   : std_logic_vector(15 downto 0);
   
   signal cLedCntL, nLedCntL       : std_logic_vector(7 downto 0); --Amount of LEDs - 1, low-byte
-  signal cLedCntH, nLedCntH       : std_logic_vector(7 downto 0); --Amount of LEDs - 1, high-byte
+  signal cLedCntH, nLedCntH       : std_logic;                    --Amount of LEDs - 1, high-bit (511 max)
   signal ledCnt                   : std_logic_vector(8 downto 0); --Amount of LEDs - 1, high-byte
 
 begin
 
   rstCnt  <=  cRstCntH & cRstCntL;
-  ledCnt  <=  cLedCntH(0) & cLedCntL;
+  ledCnt  <=  cLedCntH & cLedCntL;
   
   encoder: WS_engine port map(
     CLK_IN      =>  CLK_IN,
@@ -109,7 +107,7 @@ begin
   adr_dec: process(cCSR, cT1H_Steps, cT0H_Steps, cBitSteps, cRstCntL, cRstCntH, cLedCntL, cLedCntH, WR_IN, ADR_IN, DATA_IN)
   begin
   
-    DATA_OUT    <=  cCSR;
+    DATA_OUT    <=  "000000" & cCSR;
   
     nCSR        <=  cCSR;
     nT1H_Steps  <=  cT1H_Steps;
@@ -123,7 +121,7 @@ begin
     case ADR_IN(2 downto 0) is
       when "000"  =>
         if WR_IN = '1' then
-          nCSR        <=  DATA_IN;
+          nCSR        <=  DATA_IN(1 downto 0);
         end if;
         
       when "001"  =>
@@ -163,9 +161,9 @@ begin
         end if;
         
       when "111"  =>
-        DATA_OUT  <=  cLedCntH;
+        DATA_OUT  <=  "0000000" & cLedCntH;
         if WR_IN = '1' then
-          nLedCntH    <=  DATA_IN;
+          nLedCntH    <=  DATA_IN(0);
         end if;
         
       when others =>
@@ -176,14 +174,15 @@ begin
   begin
     if rising_edge(CLK_IN) then
       if RST_IN = '1' then
+        --Werte für 100 MHz
         cCSR        <=  (others=>'0');
-        cT1H_Steps  <=  (others=>'0');
-        cT0H_Steps  <=  (others=>'0');
-        cBitSteps   <=  (others=>'0');
-        cRstCntL    <=  (others=>'0');
-        cRstCntH    <=  (others=>'0');
-        cLedCntL    <=  (others=>'0');
-        cLedCntH    <=  (others=>'0');
+        cT1H_Steps  <=  std_logic_vector(to_unsigned(79, 8));
+        cT0H_Steps  <=  std_logic_vector(to_unsigned(39, 8));
+        cBitSteps   <=  std_logic_vector(to_unsigned(124, 8));
+        cRstCntL    <=  x"87";
+        cRstCntH    <=  x"13";
+        cLedCntL    <=  std_logic_vector(to_unsigned(255, 8));
+        cLedCntH    <=  '1';
       else
         cCSR        <=  nCSR;
         cT1H_Steps  <=  nT1H_Steps;

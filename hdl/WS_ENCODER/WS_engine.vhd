@@ -111,7 +111,7 @@ begin
       
       when SHIFT =>
         nBitSeq <=  cBitSeq + 1;
-        nData   <=  cData(22 downto 0) & '0';
+        nData   <=  cData(22 downto 0) & '-';
         nNumBit <=  cNumBit - 1;
         if cNumBit = 0 then
           nNumBit <=  23;

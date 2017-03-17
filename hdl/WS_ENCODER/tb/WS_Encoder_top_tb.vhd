@@ -41,31 +41,29 @@ ARCHITECTURE behavior OF WS_Encoder_top_tb IS
  
     COMPONENT WS_Encoder_top
     PORT(
-         CLK_IN : IN  std_logic;
-         RST_IN : IN  std_logic;
-         WR_IN : IN  std_logic;
-         ADR_IN : IN  std_logic_vector(7 downto 0);
-         DATA_IN : IN  std_logic_vector(7 downto 0);
-         DATA_OUT : OUT  std_logic_vector(7 downto 0);
-         M_RD_OUT : OUT  std_logic;
-         M_ADR_OUT : OUT  std_logic_vector(8 downto 0);
-         M_DATA_IN : IN  std_logic_vector(23 downto 0);
-         PIXEL_OUT : OUT  std_logic
+         CLK_IN     : IN  std_logic;
+         RST_IN     : IN  std_logic;
+         WR_IN      : IN  std_logic;
+         ADR_IN     : IN  std_logic_vector(2 downto 0);
+         DATA_IN    : IN  std_logic_vector(7 downto 0);
+         DATA_OUT   : OUT std_logic_vector(7 downto 0);
+         M_ADR_OUT  : OUT std_logic_vector(8 downto 0);
+         M_DATA_IN  : IN  std_logic_vector(23 downto 0);
+         PIXEL_OUT  : OUT std_logic
         );
     END COMPONENT;
     
 
    --Inputs
-   signal CLK_IN : std_logic := '0';
-   signal RST_IN : std_logic := '1';
-   signal WR_IN : std_logic := '0';
-   signal ADR_IN : std_logic_vector(7 downto 0) := (others => '0');
-   signal DATA_IN : std_logic_vector(7 downto 0) := (others => '0');
+   signal CLK_IN    : std_logic := '0';
+   signal RST_IN    : std_logic := '1';
+   signal WR_IN     : std_logic := '0';
+   signal ADR_IN    : std_logic_vector(2 downto 0)  := (others => '0');
+   signal DATA_IN   : std_logic_vector(7 downto 0)  := (others => '0');
    signal M_DATA_IN : std_logic_vector(23 downto 0) := (others => '0');
 
  	--Outputs
-   signal DATA_OUT : std_logic_vector(7 downto 0);
-   signal M_RD_OUT : std_logic;
+   signal DATA_OUT  : std_logic_vector(7 downto 0);
    signal M_ADR_OUT : std_logic_vector(8 downto 0);
    signal PIXEL_OUT : std_logic;
 
@@ -76,13 +74,12 @@ BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: WS_Encoder_top PORT MAP (
-          CLK_IN => CLK_IN,
-          RST_IN => RST_IN,
-          WR_IN => WR_IN,
-          ADR_IN => ADR_IN,
-          DATA_IN => DATA_IN,
-          DATA_OUT => DATA_OUT,
-          M_RD_OUT => M_RD_OUT,
+          CLK_IN    => CLK_IN,
+          RST_IN    => RST_IN,
+          WR_IN     => WR_IN,
+          ADR_IN    => ADR_IN,
+          DATA_IN   => DATA_IN,
+          DATA_OUT  => DATA_OUT,
           M_ADR_OUT => M_ADR_OUT,
           M_DATA_IN => M_DATA_IN,
           PIXEL_OUT => PIXEL_OUT
