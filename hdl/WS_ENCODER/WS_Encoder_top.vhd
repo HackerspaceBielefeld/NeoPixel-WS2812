@@ -51,9 +51,6 @@ entity WS_Encoder_top is
     ADR_IN      : in  std_logic_vector(3 downto 0);
     DATA_IN     : in  std_logic_vector(7 downto 0);
     DATA_OUT    : out std_logic_vector(7 downto 0);
-        
-    M_ADR_OUT   : out std_logic_vector(8 downto 0);
-    M_DATA_IN   : in  std_logic_vector(23 downto 0);
     
     PIXEL_OUT   : out std_logic
   );
@@ -82,6 +79,34 @@ architecture RTL of WS_Encoder_top is
     );
   end component;
   
+  component WS_VRAM_Control is
+    port(
+      CLK_IN      : in  std_logic;
+      RST_IN      : in  std_logic;
+      
+      COL_MODE_IN : in  std_logic_vector(1 downto 0);
+      
+      V_ADR_RST_IN: in  std_logic;
+      V_ADR_EN_IN : in  std_logic;
+      V_ADR_IN    : in  std_logic_vector(8 downto 0);
+      V_ADR_OUT   : out std_logic_vector(8 downto 0);
+      
+      P_ADR_RST_IN: in  std_logic;
+      P_ADR_EN_IN : in  std_logic;
+      P_ADR_IN    : in  std_logic_vector(7 downto 0);
+      P_ADR_OUT   : out std_logic_vector(7 downto 0);
+      
+      V_DATA_EN_IN: in  std_logic;
+      V_DATA_IN   : in  std_logic_vector(7 downto 0);
+      
+      P_DATA_EN_IN: in  std_logic;
+      P_DATA_IN   : in  std_logic_vector(7 downto 0);
+      
+      LED_ADR_IN  : in  std_logic_vector(8 downto 0);
+      LED_DATA_OUT: out std_logic_vector(23 downto 0) 
+    );
+  end component;
+  
   signal cCSR, nCSR               : std_logic_vector(5 downto 0); --Control/Status-Register
   
   signal cT1H_Steps, nT1H_Steps   : std_logic_vector(7 downto 0); --High-time in clocks for 1-bits
@@ -96,7 +121,21 @@ architecture RTL of WS_Encoder_top is
   signal cLedCntH, nLedCntH       : std_logic;                    --Amount of LEDs - 1, high-bit (511 max)
   signal ledCnt                   : std_logic_vector(8 downto 0); --Amount of LEDs - 1, high-byte
   signal engineBusy               : std_logic;
+  
+  signal ledData                  : std_logic_vector(23 downto 0);
+  signal ledAdr                   : std_logic_vector( 8 downto 0);
 
+  signal vAdrRst                  : std_logic;
+  signal vAdrEn                   : std_logic;
+  signal vAdrIn                   : std_logic_vector(8 downto 0);
+  signal vAdrOut                  : std_logic_vector(8 downto 0);
+  signal vDataEn                  : std_logic;
+  
+  signal pAdrRst                  : std_logic;
+  signal pAdrEn                   : std_logic;
+  signal pAdrOut                  : std_logic_vector(7  downto 0);
+  signal pDataEn                  : std_logic;
+  
 begin
 
   rstCnt  <=  cRstCntH & cRstCntL;
@@ -112,18 +151,41 @@ begin
     BIT_SEQ_IN  =>  cBitSteps,
     RST_CNT_IN  =>  rstCnt,
     LED_CNT_IN  =>  ledCnt,
-    ADR_OUT     =>  M_ADR_OUT,
-    DATA_IN     =>  M_DATA_IN,
+    ADR_OUT     =>  ledAdr,
+    DATA_IN     =>  ledData,
     PIXEL_OUT   =>  PIXEL_OUT
   );
   
-  adr_dec: process(cCSR, cT1H_Steps, cT0H_Steps, cBitSteps, cRstCntL, cRstCntH, cLedCntL, cLedCntH, WR_IN, ADR_IN, DATA_IN, engineBusy)
+  vram: WS_VRAM_Control port map(
+    CLK_IN        => CLK_IN,
+    RST_IN        => RST_IN,
+    COL_MODE_IN   => cCSR(3 downto 2),
+    V_ADR_RST_IN  => vAdrRst,
+    V_ADR_EN_IN   => vAdrEn,
+    V_ADR_IN      => vAdrIn,
+    V_ADR_OUT     => vAdrOut,
+    P_ADR_RST_IN  => pAdrRst,
+    P_ADR_EN_IN   => pAdrEn,
+    P_ADR_IN      => DATA_IN,
+    P_ADR_OUT     => pAdrOut,
+    V_DATA_EN_IN  => vDataEn,
+    V_DATA_IN     => DATA_IN,
+    P_DATA_EN_IN  => pDataEn,
+    P_DATA_IN     => DATA_IN,
+    LED_ADR_IN    => ledAdr,
+    LED_DATA_OUT  => ledData
+  );
+  
+  adr_dec: process(cCSR, cT1H_Steps, cT0H_Steps, cBitSteps, cRstCntL, cRstCntH, 
+                   cLedCntL, cLedCntH, WR_IN, ADR_IN, DATA_IN, engineBusy, pAdrOut, vAdrOut)
   begin
   
     DATA_OUT    <=  "00" & cCSR;
   
     nCSR        <=  cCSR;
     nCSR(1)     <=  engineBusy;
+    nCSR(4)     <=  '0';
+    nCSR(5)     <=  '0';
     nT1H_Steps  <=  cT1H_Steps;
     nT0H_Steps  <=  cT0H_Steps;
     nBitSteps   <=  cBitSteps;
@@ -131,6 +193,14 @@ begin
     nRstCntH    <=  cRstCntH;
     nLedCntL    <=  cLedCntL;
     nLedCntH    <=  cLedCntH;
+    vAdrRst     <=  cCSR(4);
+    pAdrRst     <=  cCSR(5);
+    vDataEn     <=  '0';
+    vAdrEn      <=  '0';
+    pAdrEn      <=  '0';
+    pDataEn     <=  '0';
+    vAdrIn      <=  vAdrOut;
+    
     
     case ADR_IN is
       when x"0"  =>
@@ -182,14 +252,28 @@ begin
         end if;
         
       when x"8"  =>
-
+        vDataEn <=  WR_IN;
+        
       when x"9"  =>
-
+        DATA_OUT  <= vAdrOut(7 downto 0);
+        if WR_IN = '1' then
+          vAdrIn  <= vAdrOut(8) & DATA_IN;
+          vAdrEn  <= '1';
+        end if;
+        
       when x"A"  =>
-
+        DATA_OUT  <= "0000000" & vAdrOut(8);
+        if WR_IN = '1' then
+          vAdrIn  <= DATA_IN(0) & vAdrOut(7 downto 0);
+          vAdrEn  <= '1';
+        end if;
+        
       when x"B"  =>
+        DATA_OUT  <= pAdrOut;
+        pAdrEn    <= WR_IN;
         
       when x"C"  =>
+        pDataEn <=  WR_IN;
         
       when others =>
     end case;

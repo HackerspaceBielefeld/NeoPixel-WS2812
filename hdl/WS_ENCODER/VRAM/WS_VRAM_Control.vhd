@@ -111,6 +111,7 @@ begin
   
   pDataIn   <= cPData & P_DATA_IN;
   P_ADR_OUT <= std_logic_vector(cPAdrCnt);
+  V_ADR_OUT <= std_logic_vector(cVAdrCnt);
   
   logic: process(COL_MODE_IN, P_ADR_EN_IN, P_ADR_IN, P_DATA_EN_IN, P_DATA_IN, 
                  V_DATA_EN_IN, V_DATA_IN, cVWrData, cVAdrCnt, cVDatCnt, cVData,
@@ -260,7 +261,5 @@ begin
       end if;
     end if;
   end process;
-  
-  
 
 end RTL;
