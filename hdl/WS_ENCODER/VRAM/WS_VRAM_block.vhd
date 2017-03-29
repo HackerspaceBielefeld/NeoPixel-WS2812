@@ -20,7 +20,7 @@ use IEEE.NUMERIC_STD.ALL;
 library work;
 use work.ram_pkg.all;
 
-entity MMU_vram is
+entity WS_VRAM_block is
   port(
     CLK_IN      : in  std_logic;
     
@@ -29,13 +29,12 @@ entity MMU_vram is
     ADR_A_IN    : in  std_logic_vector( 8 downto 0);
     DATA_A_IN   : in  std_logic_vector(23 downto 0);
 
-    
     ADR_B_IN    : in  std_logic_vector( 8 downto 0);
     DATA_B_OUT  : out std_logic_vector(23 downto 0) 
   );
-end MMU_vram;
+end WS_VRAM_block;
 
-architecture RTL of MMU_vram is
+architecture RTL of WS_VRAM_block is
 
   signal dat_r_in  : std_logic_vector(7 downto 0);
   signal dat_g_in  : std_logic_vector(7 downto 0);

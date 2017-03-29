@@ -20,7 +20,7 @@ use IEEE.NUMERIC_STD.ALL;
 library work;
 use work.ram_pkg.all;
 
-entity MMU_pram is
+entity WS_PRAM_block is
   port(
     CLK_IN    : in  std_logic;
     
@@ -30,9 +30,9 @@ entity MMU_pram is
     DATA_IN   : in  std_logic_vector(23 downto 0);
     DATA_OUT  : out std_logic_vector(23 downto 0) 
   );
-end MMU_pram;
+end WS_PRAM_block;
 
-architecture RTL of MMU_pram is
+architecture RTL of WS_PRAM_block is
 
   signal dat_r_in  : std_logic_vector(7 downto 0);
   signal dat_g_in  : std_logic_vector(7 downto 0);

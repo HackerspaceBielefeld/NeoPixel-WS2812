@@ -18,10 +18,20 @@
 --     6      R/W     Num LED low.
 --     7      R/W     Num LED high.
 --
+--     8       W      LED-color data register
+--     9      R/W     LED VRAM pointer low
+--    10      R/W     LED VRAM pointer high
+--    11      R/W     Palette-RAM-pointer
+--    12       W      Palette-Data-Register
+--
 --    Control/Status register
---    BIT   VAL   R/W   DESC
---     0     1    R/W   Enable transmitter.
---     1     1     R    Transmission in progress.
+--    BIT   R/W   DESC
+--     0    R/W   Enable transmitter.
+--     1     R    Transmission in progress.
+--     2    R/W   Bit 2 und 3 legen das Farbformat fest.
+--     3    R/W   0: 24-Bit, 1: 16-Bit 1555, 2: 16-Bit 565, 3: 8-Bit via Palette
+--     4     W    Clear LED VRAM pointer
+--     5     W    Clear Palette-Data-Pointer
 --
 -- Revision:
 -- Revision 0.1 File created
@@ -38,7 +48,7 @@ entity WS_Encoder_top is
     
     WR_IN       : in  std_logic;
     
-    ADR_IN      : in  std_logic_vector(2 downto 0);
+    ADR_IN      : in  std_logic_vector(3 downto 0);
     DATA_IN     : in  std_logic_vector(7 downto 0);
     DATA_OUT    : out std_logic_vector(7 downto 0);
         
@@ -57,6 +67,7 @@ architecture RTL of WS_Encoder_top is
       RST_IN      : in  std_logic;
       
       ENA_IN      : in  std_logic;
+      BUSY_OUT    : out std_logic;
       
       T1H_IN      : in  std_logic_vector(7 downto 0);
       T0H_IN      : in  std_logic_vector(7 downto 0);
@@ -71,7 +82,7 @@ architecture RTL of WS_Encoder_top is
     );
   end component;
   
-  signal cCSR, nCSR               : std_logic_vector(1 downto 0); --Control/Status-Register
+  signal cCSR, nCSR               : std_logic_vector(5 downto 0); --Control/Status-Register
   
   signal cT1H_Steps, nT1H_Steps   : std_logic_vector(7 downto 0); --High-time in clocks for 1-bits
   signal cT0H_Steps, nT0H_Steps   : std_logic_vector(7 downto 0); --High-time in clocks for 0-bits
@@ -84,6 +95,7 @@ architecture RTL of WS_Encoder_top is
   signal cLedCntL, nLedCntL       : std_logic_vector(7 downto 0); --Amount of LEDs - 1, low-byte
   signal cLedCntH, nLedCntH       : std_logic;                    --Amount of LEDs - 1, high-bit (511 max)
   signal ledCnt                   : std_logic_vector(8 downto 0); --Amount of LEDs - 1, high-byte
+  signal engineBusy               : std_logic;
 
 begin
 
@@ -94,6 +106,7 @@ begin
     CLK_IN      =>  CLK_IN,
     RST_IN      =>  RST_IN,
     ENA_IN      =>  cCSR(0),
+    BUSY_OUT    =>  engineBusy,
     T1H_IN      =>  cT1H_Steps,
     T0H_IN      =>  cT0H_Steps,
     BIT_SEQ_IN  =>  cBitSteps,
@@ -104,12 +117,13 @@ begin
     PIXEL_OUT   =>  PIXEL_OUT
   );
   
-  adr_dec: process(cCSR, cT1H_Steps, cT0H_Steps, cBitSteps, cRstCntL, cRstCntH, cLedCntL, cLedCntH, WR_IN, ADR_IN, DATA_IN)
+  adr_dec: process(cCSR, cT1H_Steps, cT0H_Steps, cBitSteps, cRstCntL, cRstCntH, cLedCntL, cLedCntH, WR_IN, ADR_IN, DATA_IN, engineBusy)
   begin
   
-    DATA_OUT    <=  "000000" & cCSR;
+    DATA_OUT    <=  "00" & cCSR;
   
     nCSR        <=  cCSR;
+    nCSR(1)     <=  engineBusy;
     nT1H_Steps  <=  cT1H_Steps;
     nT0H_Steps  <=  cT0H_Steps;
     nBitSteps   <=  cBitSteps;
@@ -118,53 +132,64 @@ begin
     nLedCntL    <=  cLedCntL;
     nLedCntH    <=  cLedCntH;
     
-    case ADR_IN(2 downto 0) is
-      when "000"  =>
+    case ADR_IN is
+      when x"0"  =>
         if WR_IN = '1' then
-          nCSR        <=  DATA_IN(1 downto 0);
+          nCSR(5 downto 2)  <=  DATA_IN(5 downto 2);
+          nCSR(0)           <=  DATA_IN(0);
         end if;
         
-      when "001"  =>
+      when x"1"  =>
         DATA_OUT  <=  cT1H_Steps;
         if WR_IN = '1' then
           nT1H_Steps  <=  DATA_IN;
         end if;
         
-      when "010"  =>
+      when x"2"  =>
         DATA_OUT  <=  cT0H_Steps;
         if WR_IN = '1' then
           nT0H_Steps  <=  DATA_IN;
         end if;
         
-      when "011"  =>
+      when x"3"  =>
         DATA_OUT  <=  cBitSteps;
         if WR_IN = '1' then
           nBitSteps   <=  DATA_IN;
         end if;
         
-      when "100"  =>
+      when x"4"  =>
         DATA_OUT  <=  cRstCntL;
         if WR_IN = '1' then
           nRstCntL    <=  DATA_IN;
         end if;
         
-      when "101"  =>
+      when x"5"  =>
         DATA_OUT  <=  cRstCntH;
         if WR_IN = '1' then
           nRstCntH    <=  DATA_IN;
         end if;
         
-      when "110"  =>
+      when x"6"  =>
         DATA_OUT  <=  cLedCntL;
         if WR_IN = '1' then
           nLedCntL    <=  DATA_IN;
         end if;
         
-      when "111"  =>
+      when x"7"  =>
         DATA_OUT  <=  "0000000" & cLedCntH;
         if WR_IN = '1' then
           nLedCntH    <=  DATA_IN(0);
         end if;
+        
+      when x"8"  =>
+
+      when x"9"  =>
+
+      when x"A"  =>
+
+      when x"B"  =>
+        
+      when x"C"  =>
         
       when others =>
     end case;

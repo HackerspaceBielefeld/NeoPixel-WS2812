@@ -171,26 +171,7 @@ architecture RTL of NeoPixel_top is
     );
   end component;
 
-  component MMU_top is
-    port(
-      --System clock and master reset
-      CLK_IN      : in  std_logic;
-      RST_IN      : in  std_logic;
-      
-      --Bus interface
-      WR_IN       : in  std_logic;
-      
-      ADR_IN      : in  std_logic_vector(10 downto 0);
-      DATA_IN     : in  std_logic_vector(7 downto 0);
-      DATA_OUT    : out std_logic_vector(7 downto 0);
-      
-      --WS_Encoder interface
-      M_RD_IN     : in  std_logic;
-      
-      M_ADR_IN    : in  std_logic_vector(8 downto 0);
-      M_DATA_OUT  : out std_logic_vector(23 downto 0) 
-    );
-  end component;
+
 
   component WS_Encoder_top is
     port(
@@ -370,22 +351,7 @@ begin
     S1_DATA_OUT =>  WS_din,
     S1_DATA_in  =>  WS_dout
   );
-  
-  MMU: MMU_top port map(
-    CLK_IN      =>  CLK_IN,
-    RST_IN      =>  reset,
-    
-    WR_IN       =>  MMU_wr,
-    
-    ADR_IN      =>  MMU_adr,
-    DATA_IN     =>  MMU_din,
-    DATA_OUT    =>  MMU_dout,
-    
-    M_RD_IN     =>  MMU_WS_rd,
-    
-    M_ADR_IN    =>  MMU_WS_adr,
-    M_DATA_OUT  =>  MMU_WS_dta
-  );
+
   
   WS_Encoder: WS_Encoder_top port map(
     CLK_IN      =>  CLK_IN,

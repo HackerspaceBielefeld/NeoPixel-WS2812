@@ -23,6 +23,7 @@ entity WS_engine is
     RST_IN      : in  std_logic;
     
     ENA_IN      : in  std_logic;
+    BUSY_OUT    : out std_logic;
     
     T1H_IN      : in  std_logic_vector(7 downto 0);
     T0H_IN      : in  std_logic_vector(7 downto 0);
@@ -71,6 +72,7 @@ begin
               cNumBit, cRstCnt, rstCnt , cData, cState)
   begin
     PIXEL_OUT <=  '0';
+    BUSY_OUT  <=  '1';
     
     nBitSeq   <=  cBitSeq;
     
@@ -87,6 +89,7 @@ begin
         nBitSeq <=  (others => '0');
         nLedCnt <=  (others => '0');
         nNumBit <=  23;
+        BUSY_OUT  <= '0';
         if ENA_IN = '1' then
           nState  <=  FETCH;
         end if;
@@ -139,6 +142,7 @@ begin
         end if;
       
       when RST =>
+        BUSY_OUT  <= '0';
         nRstCnt <=  cRstCnt + 1;
         if cRstCnt = rstCnt then
           nState <= IDLE;
