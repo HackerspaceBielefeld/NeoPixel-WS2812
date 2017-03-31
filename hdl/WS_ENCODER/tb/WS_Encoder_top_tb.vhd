@@ -44,11 +44,9 @@ ARCHITECTURE behavior OF WS_Encoder_top_tb IS
          CLK_IN     : IN  std_logic;
          RST_IN     : IN  std_logic;
          WR_IN      : IN  std_logic;
-         ADR_IN     : IN  std_logic_vector(2 downto 0);
+         ADR_IN     : IN  std_logic_vector(3 downto 0);
          DATA_IN    : IN  std_logic_vector(7 downto 0);
          DATA_OUT   : OUT std_logic_vector(7 downto 0);
-         M_ADR_OUT  : OUT std_logic_vector(8 downto 0);
-         M_DATA_IN  : IN  std_logic_vector(23 downto 0);
          PIXEL_OUT  : OUT std_logic
         );
     END COMPONENT;
@@ -58,14 +56,13 @@ ARCHITECTURE behavior OF WS_Encoder_top_tb IS
    signal CLK_IN    : std_logic := '0';
    signal RST_IN    : std_logic := '1';
    signal WR_IN     : std_logic := '0';
-   signal ADR_IN    : std_logic_vector(2 downto 0)  := (others => '0');
+   signal ADR_IN    : std_logic_vector(3 downto 0)  := (others => '0');
    signal DATA_IN   : std_logic_vector(7 downto 0)  := (others => '0');
-   signal M_DATA_IN : std_logic_vector(23 downto 0) := (others => '0');
+
 
  	--Outputs
-   signal DATA_OUT  : std_logic_vector(7 downto 0);
-   signal M_ADR_OUT : std_logic_vector(8 downto 0);
    signal PIXEL_OUT : std_logic;
+   signal DATA_OUT   : std_logic_vector(7 downto 0);
 
    -- Clock period definitions
    constant CLK_IN_period : time := 10 ns;
@@ -80,8 +77,6 @@ BEGIN
           ADR_IN    => ADR_IN,
           DATA_IN   => DATA_IN,
           DATA_OUT  => DATA_OUT,
-          M_ADR_OUT => M_ADR_OUT,
-          M_DATA_IN => M_DATA_IN,
           PIXEL_OUT => PIXEL_OUT
         );
 
@@ -103,16 +98,38 @@ BEGIN
       RST_IN  <=  '0';
       wait until falling_edge(CLK_IN);
       
-      DATA_IN <=  x"01";
-      M_DATA_IN <=  x"055AA1";
-      wait until falling_edge(CLK_IN);
-      
+      ADR_IN  <=  "1000";
+      DATA_IN <=  x"AA";
       WR_IN   <=  '1';
       wait until falling_edge(CLK_IN);
       
       WR_IN   <=  '0';
       wait until falling_edge(CLK_IN);
-
+      
+      --ADR_IN  <=  "1000";
+      DATA_IN <=  x"55";
+      WR_IN   <=  '1';
+      wait until falling_edge(CLK_IN);
+      
+      WR_IN   <=  '0';
+      wait until falling_edge(CLK_IN);
+      
+      --ADR_IN  <=  "1000";
+      DATA_IN <=  x"A5";
+      WR_IN   <=  '1';
+      wait until falling_edge(CLK_IN);
+      
+      WR_IN   <=  '0';
+      wait until falling_edge(CLK_IN);
+      
+      ADR_IN  <=  "0000";
+      DATA_IN <=  x"01";
+      WR_IN   <=  '1';
+      wait until falling_edge(CLK_IN);
+      
+      WR_IN   <=  '0';
+      wait until falling_edge(CLK_IN);
+      
       wait;
    end process;
 
