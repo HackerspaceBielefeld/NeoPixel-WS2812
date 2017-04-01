@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="D:/Users/Fki/Documents/NeoPixel/prj/working/WS_Encoder_top_tb_1555_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="numeric_std" />
+            <top_module name="ram_pkg" />
+            <top_module name="std_logic_1164" />
+            <top_module name="std_logic_textio" />
+            <top_module name="textio" />
+            <top_module name="ws_encoder_top_tb_1555" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="15" />
+   <wvobject fp_name="/ws_encoder_top_tb_1555/clk_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk_in</obj_property>
+      <obj_property name="ObjectShortName">clk_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/rst_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst_in</obj_property>
+      <obj_property name="ObjectShortName">rst_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/wr_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">wr_in</obj_property>
+      <obj_property name="ObjectShortName">wr_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/adr_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">adr_in[3:0]</obj_property>
+      <obj_property name="ObjectShortName">adr_in[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/data_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">data_in[7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_in[7:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/pixel_out" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">pixel_out</obj_property>
+      <obj_property name="ObjectShortName">pixel_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/data_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">data_out[7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_out[7:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/clk_in_period" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">clk_in_period</obj_property>
+      <obj_property name="ObjectShortName">clk_in_period</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/uut/vram/vram_inst/wr_a_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">wr_a_in</obj_property>
+      <obj_property name="ObjectShortName">wr_a_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/uut/vram/vram_inst/adr_a_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">adr_a_in[8:0]</obj_property>
+      <obj_property name="ObjectShortName">adr_a_in[8:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/uut/vram/vram_inst/data_a_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">data_a_in[23:0]</obj_property>
+      <obj_property name="ObjectShortName">data_a_in[23:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/uut/vram/vram_inst/data_b_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">data_b_out[23:0]</obj_property>
+      <obj_property name="ObjectShortName">data_b_out[23:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/uut/vram/vram_inst/adr_b_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">adr_b_in[8:0]</obj_property>
+      <obj_property name="ObjectShortName">adr_b_in[8:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/uut/vram/col_mode_in" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">col_mode_in[1:0]</obj_property>
+      <obj_property name="ObjectShortName">col_mode_in[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/ws_encoder_top_tb_1555/uut/vram/cvdata" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">cvdata[15:0]</obj_property>
+      <obj_property name="ObjectShortName">cvdata[15:0]</obj_property>
+   </wvobject>
+</wave_config>

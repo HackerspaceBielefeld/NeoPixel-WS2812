@@ -32,10 +32,10 @@ USE ieee.std_logic_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
  
-ENTITY WS_Encoder_top_tb IS
-END WS_Encoder_top_tb;
+ENTITY WS_Encoder_top_tb_565 IS
+END WS_Encoder_top_tb_565;
  
-ARCHITECTURE behavior OF WS_Encoder_top_tb IS 
+ARCHITECTURE behavior OF WS_Encoder_top_tb_565 IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
@@ -98,6 +98,14 @@ BEGIN
       RST_IN  <=  '0';
       wait until rising_edge(CLK_IN);
       
+      ADR_IN  <=  "0000";
+      DATA_IN <=  x"08";
+      WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+      
+      WR_IN   <=  '0';
+      wait until rising_edge(CLK_IN);
+      
       ADR_IN  <=  "1000";
       DATA_IN <=  x"AA";
       WR_IN   <=  '1';
@@ -114,21 +122,9 @@ BEGIN
       --WR_IN   <=  '0';
       --wait until rising_edge(CLK_IN);
       
-      --ADR_IN  <=  "1000";
-      DATA_IN <=  x"A5";
-      --WR_IN   <=  '1';
-      wait until rising_edge(CLK_IN);      
-      
+
       --ADR_IN  <=  "1000";
       DATA_IN <=  x"cd";
-      --WR_IN   <=  '1';
-      wait until rising_edge(CLK_IN);
-      
-      --WR_IN   <=  '0';
-      --wait until rising_edge(CLK_IN);
-      
-      --ADR_IN  <=  "1000";
-      DATA_IN <=  x"95";
       --WR_IN   <=  '1';
       wait until rising_edge(CLK_IN);
       
@@ -144,7 +140,7 @@ BEGIN
       wait until rising_edge(CLK_IN);
       
       ADR_IN  <=  "0000";
-      DATA_IN <=  x"01";
+      DATA_IN <=  x"09";
       WR_IN   <=  '1';
       wait until rising_edge(CLK_IN);
       

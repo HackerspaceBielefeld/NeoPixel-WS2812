@@ -32,10 +32,10 @@ USE ieee.std_logic_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 --USE ieee.numeric_std.ALL;
  
-ENTITY WS_Encoder_top_tb IS
-END WS_Encoder_top_tb;
+ENTITY WS_Encoder_top_tb_8 IS
+END WS_Encoder_top_tb_8;
  
-ARCHITECTURE behavior OF WS_Encoder_top_tb IS 
+ARCHITECTURE behavior OF WS_Encoder_top_tb_8 IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
@@ -98,7 +98,7 @@ BEGIN
       RST_IN  <=  '0';
       wait until rising_edge(CLK_IN);
       
-      ADR_IN  <=  "1000";
+      ADR_IN  <=  "1100";
       DATA_IN <=  x"AA";
       WR_IN   <=  '1';
       wait until rising_edge(CLK_IN);
@@ -139,12 +139,95 @@ BEGIN
       DATA_IN <=  x"24";
       --WR_IN   <=  '1';
       wait until rising_edge(CLK_IN);
+
+      --ADR_IN  <=  "1000";
+      DATA_IN <=  x"ac";
+      --WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+      
+      --WR_IN   <=  '0';
+      --wait until rising_edge(CLK_IN);
+      
+      --ADR_IN  <=  "1000";
+      DATA_IN <=  x"23";
+      --WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+      
+      --WR_IN   <=  '0';
+      --wait until rising_edge(CLK_IN);
+      
+      --ADR_IN  <=  "1000";
+      DATA_IN <=  x"54";
+      --WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+
+      --ADR_IN  <=  "1000";
+      DATA_IN <=  x"88";
+      --WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+      
+      --WR_IN   <=  '0';
+      --wait until rising_edge(CLK_IN);
+      
+      --ADR_IN  <=  "1000";
+      DATA_IN <=  x"66";
+      --WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+      
+      --WR_IN   <=  '0';
+      --wait until rising_edge(CLK_IN);
+      
+      --ADR_IN  <=  "1000";
+      DATA_IN <=  x"33";
+      --WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
       
       WR_IN   <=  '0';
       wait until rising_edge(CLK_IN);
       
       ADR_IN  <=  "0000";
+      DATA_IN <=  x"0c";
+      WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+      
+      WR_IN   <=  '0';
+      wait until rising_edge(CLK_IN);
+      
+      ADR_IN  <=  "1000";
+      DATA_IN <=  x"00";
+      WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+      
+      --WR_IN   <=  '0';
+      --wait until rising_edge(CLK_IN);
+      
+      --ADR_IN  <=  "1000";
       DATA_IN <=  x"01";
+      --WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+      
+      --WR_IN   <=  '0';
+      --wait until rising_edge(CLK_IN);
+      
+
+      --ADR_IN  <=  "1000";
+      DATA_IN <=  x"02";
+      --WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+      
+      --WR_IN   <=  '0';
+      --wait until rising_edge(CLK_IN);
+      
+      --ADR_IN  <=  "1000";
+      DATA_IN <=  x"03";
+      --WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+      
+      WR_IN   <=  '0';
+      wait until rising_edge(CLK_IN);
+      
+      ADR_IN  <=  "0000";
+      DATA_IN <=  x"0d";
       WR_IN   <=  '1';
       wait until rising_edge(CLK_IN);
       
