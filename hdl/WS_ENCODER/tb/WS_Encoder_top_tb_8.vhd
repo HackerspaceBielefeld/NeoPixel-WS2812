@@ -98,6 +98,14 @@ BEGIN
       RST_IN  <=  '0';
       wait until rising_edge(CLK_IN);
       
+      ADR_IN  <=  "0000";
+      DATA_IN <=  x"0c";
+      WR_IN   <=  '1';
+      wait until rising_edge(CLK_IN);
+      
+      WR_IN   <=  '0';
+      wait until rising_edge(CLK_IN);
+      
       ADR_IN  <=  "1100";
       DATA_IN <=  x"AA";
       WR_IN   <=  '1';
@@ -185,13 +193,6 @@ BEGIN
       WR_IN   <=  '0';
       wait until rising_edge(CLK_IN);
       
-      ADR_IN  <=  "0000";
-      DATA_IN <=  x"0c";
-      WR_IN   <=  '1';
-      wait until rising_edge(CLK_IN);
-      
-      WR_IN   <=  '0';
-      wait until rising_edge(CLK_IN);
       
       ADR_IN  <=  "1000";
       DATA_IN <=  x"00";

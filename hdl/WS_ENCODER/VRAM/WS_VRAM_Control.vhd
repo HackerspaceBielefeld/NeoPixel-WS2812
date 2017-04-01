@@ -140,60 +140,66 @@ begin
 
     case COL_MODE_IN is
       when "00" =>
-        case cVDatCnt is
-          when 0 =>
-            nVData(15 downto 8) <= V_DATA_IN;
-            nVDatCnt  <= cVDatCnt + 1;
-            
-          when 1 =>
-            nVData(7 downto 0) <= V_DATA_IN;
-            nVDatCnt  <= cVDatCnt + 1;
-            
-          when 2 =>
-            nVDatCnt  <= 0;
-            vWrData   <= V_DATA_EN_IN;
-            nVAdrCnt  <= cVAdrCnt + 1;
-        end case;
+        if V_DATA_EN_IN = '1' then
+          case cVDatCnt is
+            when 0 =>
+              nVData(15 downto 8) <= V_DATA_IN;
+              nVDatCnt  <= cVDatCnt + 1;
+              
+            when 1 =>
+              nVData(7 downto 0) <= V_DATA_IN;
+              nVDatCnt  <= cVDatCnt + 1;
+              
+            when 2 =>
+              nVDatCnt  <= 0;
+              vWrData   <= V_DATA_EN_IN;
+              nVAdrCnt  <= cVAdrCnt + 1;
+          end case;
+        end if;
         
       when "01" =>
-        case cVDatCnt is
-          when 0 =>
-            nVData(7 downto 0) <= V_DATA_IN;
-            nVDatCnt  <= cVDatCnt + 1;
-            
-          when 1 =>
-            nVDatCnt  <= 0;
-            vWrData   <= V_DATA_EN_IN;
-            vDataIn   <= cVData(6) & cVData(5) & cVData(4) & cVData(4) &
-                         cVData(3) & cVData(3) & cVData(2) & cVData(2) &
-                         cVData(1) & cVData(0) & V_DATA_IN(7) & V_DATA_IN(7) &
-                         V_DATA_IN(6) & V_DATA_IN(6) & V_DATA_IN(5) & V_DATA_IN(5) &
-                         V_DATA_IN(4) & V_DATA_IN(3) & V_DATA_IN(2) & V_DATA_IN(2) &
-                         V_DATA_IN(1) & V_DATA_IN(1) & V_DATA_IN(0) & V_DATA_IN(0);
-            nVAdrCnt  <= cVAdrCnt + 1;
-            
-            when others =>
-        end case;
+        if V_DATA_EN_IN = '1' then
+          case cVDatCnt is
+            when 0 =>
+              nVData(7 downto 0) <= V_DATA_IN;
+              nVDatCnt  <= cVDatCnt + 1;
+              
+            when 1 =>
+              nVDatCnt  <= 0;
+              vWrData   <= V_DATA_EN_IN;
+              vDataIn   <= cVData(6) & cVData(5) & cVData(4) & cVData(4) &
+                          cVData(3) & cVData(3) & cVData(2) & cVData(2) &
+                          cVData(1) & cVData(0) & V_DATA_IN(7) & V_DATA_IN(7) &
+                          V_DATA_IN(6) & V_DATA_IN(6) & V_DATA_IN(5) & V_DATA_IN(5) &
+                          V_DATA_IN(4) & V_DATA_IN(3) & V_DATA_IN(2) & V_DATA_IN(2) &
+                          V_DATA_IN(1) & V_DATA_IN(1) & V_DATA_IN(0) & V_DATA_IN(0);
+              nVAdrCnt  <= cVAdrCnt + 1;
+              
+              when others =>
+          end case;
+        end if;
         
       when "10" =>
-        case cVDatCnt is
-          when 0 =>
-            nVData(7 downto 0) <= V_DATA_IN;
-            nVDatCnt  <= cVDatCnt + 1;
-            
-          when 1 =>
-            nVDatCnt  <= 0;
-            vWrData   <= V_DATA_EN_IN;
-            vDataIn   <= cVData(7) & cVData(6) & cVData(5) & cVData(5) &
-                         cVData(4) & cVData(4) & cVData(3) & cVData(3) &
-                         cVData(2) & cVData(1) & cVData(0) & V_DATA_IN(7) &
-                         V_DATA_IN(6) & V_DATA_IN(6) & V_DATA_IN(5) & V_DATA_IN(5) &
-                         V_DATA_IN(4) & V_DATA_IN(3) & V_DATA_IN(2) & V_DATA_IN(2) &
-                         V_DATA_IN(1) & V_DATA_IN(1) & V_DATA_IN(0) & V_DATA_IN(0);
-            nVAdrCnt  <= cVAdrCnt + 1;
-            
-            when others =>
-        end case;
+        if V_DATA_EN_IN = '1' then
+          case cVDatCnt is
+            when 0 =>
+              nVData(7 downto 0) <= V_DATA_IN;
+              nVDatCnt  <= cVDatCnt + 1;
+              
+            when 1 =>
+              nVDatCnt  <= 0;
+              vWrData   <= V_DATA_EN_IN;
+              vDataIn   <= cVData(7) & cVData(6) & cVData(5) & cVData(5) &
+                          cVData(4) & cVData(4) & cVData(3) & cVData(3) &
+                          cVData(2) & cVData(1) & cVData(0) & V_DATA_IN(7) &
+                          V_DATA_IN(6) & V_DATA_IN(6) & V_DATA_IN(5) & V_DATA_IN(5) &
+                          V_DATA_IN(4) & V_DATA_IN(3) & V_DATA_IN(2) & V_DATA_IN(2) &
+                          V_DATA_IN(1) & V_DATA_IN(1) & V_DATA_IN(0) & V_DATA_IN(0);
+              nVAdrCnt  <= cVAdrCnt + 1;
+              
+              when others =>
+          end case;
+        end if;
         
       when "11" =>
         vDataIn   <= pDataOut;
