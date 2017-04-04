@@ -20,23 +20,28 @@ use IEEE.NUMERIC_STD.ALL;
 entity NeoPixel_top is
   port(
     --System clock
-    CLK_IN        : in  std_logic;
+    CLK_IN          : in  std_logic;
     
     --Reset button, negative logic, needs synchronisation
-    RST_BTN_N_IN  : in  std_logic;
+    RST_BTN_N_IN    : in  std_logic;
     
+    --Config-Pins, negative logic, needs synchronisation
+    CONF_AUTO_N_IN  : in  std_logic;
+    
+    LED_AUTO_OUT    : out std_logic;
+
     --SPI-lines
-    CS_IN         : in  std_logic;
-    SCLK_IN       : in  std_logic;
-    MOSI_IN       : in  std_logic;
-    MISO_OUT      : out std_logic;
+    CS_IN           : in  std_logic;
+    SCLK_IN         : in  std_logic;
+    MOSI_IN         : in  std_logic;
+    MISO_OUT        : out std_logic;
     
     --UART-lines
-    RXD_IN        : in  std_logic;
-    TXD_OUT       : out std_logic;
+    RXD_IN          : in  std_logic;
+    TXD_OUT         : out std_logic;
     
     --Data signal to NeoPixel-LED
-    PIXEL_OUT     : out std_logic
+    PIXEL_OUT       : out std_logic
   );
 end NeoPixel_top;
 
@@ -129,6 +134,9 @@ architecture RTL of NeoPixel_top is
       INT0_IN     : in  std_logic;
       INT1_IN     : in  std_logic;
     
+      CONF_AUTO_IN: in  std_logic;
+      LED_OUT     : out std_logic;
+    
       --Bus interface to serial com ports
       A_RD_OUT    : out  std_logic;
       A_WR_OUT    : out  std_logic;
@@ -140,38 +148,11 @@ architecture RTL of NeoPixel_top is
       --Bus interface to MMU and WS-driver
       B_WR_OUT    : out std_logic;
       
-      B_ADR_OUT   : out std_logic_vector(11 downto 0);
+      B_ADR_OUT   : out std_logic_vector(3 downto 0);
       B_DATA_OUT  : out std_logic_vector(7 downto 0);
       B_DATA_IN   : in  std_logic_vector(7 downto 0) 
     );
   end component;
-
-  component BIUO_top is
-    port(
-      --Master bus interface
-      M_WR_IN     : in  std_logic;
-      
-      M_ADR_IN    : in  std_logic_vector(11 downto 0);
-      M_DATA_IN   : in  std_logic_vector(7 downto 0);
-      M_DATA_OUT  : out std_logic_vector(7 downto 0);
-      
-      --Bus interface to slave 0 (MMU)
-      S0_WR_OUT   : out std_logic;
-  
-      S0_ADR_OUT  : out std_logic_vector(10 downto 0);
-      S0_DATA_OUT : out std_logic_vector(7 downto 0);
-      S0_DATA_in  : in  std_logic_vector(7 downto 0);
-      
-      --Bus interface to slave 1 (WS_Encoder)
-      S1_WR_OUT   : out std_logic;
-  
-      S1_ADR_OUT  : out std_logic_vector(10 downto 0);
-      S1_DATA_OUT : out std_logic_vector(7 downto 0);
-      S1_DATA_in  : in  std_logic_vector(7 downto 0) 
-    );
-  end component;
-
-
 
   component WS_Encoder_top is
     port(
@@ -182,15 +163,9 @@ architecture RTL of NeoPixel_top is
       --Bus interface
       WR_IN       : in  std_logic;
       
-      ADR_IN      : in  std_logic_vector(7 downto 0);
+      ADR_IN      : in  std_logic_vector(3 downto 0);
       DATA_IN     : in  std_logic_vector(7 downto 0);
       DATA_OUT    : out std_logic_vector(7 downto 0);
-      
-      --MMU interface
-      M_RD_OUT    : out std_logic;
-      
-      M_ADR_OUT   : out std_logic_vector(8 downto 0);
-      M_DATA_IN   : in  std_logic_vector(23 downto 0);
       
       --LED data out
       PIXEL_OUT   : out std_logic
@@ -198,7 +173,10 @@ architecture RTL of NeoPixel_top is
   end component;
 
   --Master reset
-  signal reset      : std_logic;
+  signal sys_reset  : std_logic;
+  
+  --Auto-Mode enable
+  signal ena_auto   : std_logic;
   
   --UART-BIUI-lines
   signal UART_rd    : std_logic;
@@ -222,39 +200,34 @@ architecture RTL of NeoPixel_top is
   signal BIUI_adr   : std_logic_vector(3 downto 0);
   signal BIUI_din   : std_logic_vector(7 downto 0);
   signal BIUI_dout  : std_logic_vector(7 downto 0);
-
-  --BIUO-Controller-lines
-  signal BIUO_wr    : std_logic;
-  signal BIUO_adr   : std_logic_vector(11 downto 0);
-  signal BIUO_din   : std_logic_vector(7 downto 0);
-  signal BIUO_dout  : std_logic_vector(7 downto 0);
-
-  --MMU-BIUO-lines
-  signal MMU_wr     : std_logic;
-  signal MMU_adr    : std_logic_vector(10 downto 0);
-  signal MMU_din    : std_logic_vector(7 downto 0);
-  signal MMU_dout   : std_logic_vector(7 downto 0);
   
-  --MMU-WS_Encoder-lines
-  signal MMU_WS_rd  : std_logic;
-  signal MMU_WS_adr : std_logic_vector(8 downto 0);
-  signal MMU_WS_dta : std_logic_vector(23 downto 0);
-  
-  --WS-BIUO-lines
+  --WS_Controller-lines
   signal WS_wr      : std_logic;
-  signal WS_adr     : std_logic_vector(10 downto 0);
+  signal WS_adr     : std_logic_vector(3 downto 0);
   signal WS_din     : std_logic_vector(7 downto 0);
   signal WS_dout    : std_logic_vector(7 downto 0);
   
+  --Sync-Registers
+  signal sync_reset : std_logic;
+  signal sync_auto  : std_logic;
+  
 begin
 
-  --Connects master reset to reset button.
-  reset   <=  not RST_BTN_N_IN; --Todo: RST_BTN_N_IN einsynchronisieren
+  sync_in: process(CLK_IN)
+  begin
+    if rising_edge(CLK_IN) then
+      sync_reset  <=  not RST_BTN_N_IN;
+      sync_auto   <=  not CONF_AUTO_N_IN;
+      
+      sys_reset   <=  sync_reset;
+      ena_auto    <=  sync_auto;
+    end if;
+  end process;
   
   --Instatiations of submodules
   UART: UART_top port map(
     CLK_IN    =>  CLK_IN,
-    RST_IN    =>  reset,
+    RST_IN    =>  sys_reset,
     
     RD_IN     =>  UART_rd,
     WR_IN     =>  UART_wr,
@@ -271,7 +244,7 @@ begin
   
   SPI: SPI_top port map(
     CLK_IN    =>  CLK_IN,
-    RST_IN    =>  reset,
+    RST_IN    =>  sys_reset,
     
     RD_IN     =>  SPI_rd,
     WR_IN     =>  SPI_wr,
@@ -312,61 +285,38 @@ begin
   );
   
   Controller: Controller_top port map(
-    CLK_IN      =>  CLK_IN,
-    RST_IN      =>  reset,
-    
-    INT0_IN     =>  SPI_int,
-    INT1_IN     =>  UART_int,
+    CLK_IN        =>  CLK_IN,
+    RST_IN        =>  sys_reset,
       
-    A_RD_OUT    =>  BIUI_rd,
-    A_WR_OUT    =>  BIUI_wr,
+    INT0_IN       =>  SPI_int,
+    INT1_IN       =>  UART_int,
       
-    A_ADR_OUT   =>  BIUI_adr,
-    A_DATA_OUT  =>  BIUI_din,
-    A_DATA_IN   =>  BIUI_dout,
-      
-    B_WR_OUT    =>  BIUO_wr,
-      
-    B_ADR_OUT   =>  BIUO_adr,
-    B_DATA_OUT  =>  BIUO_din,
-    B_DATA_IN   =>  BIUO_dout
-  );
-  
-  BIUO: BIUO_top port map(
-    M_WR_IN     =>  BIUO_wr,
-    
-    M_ADR_IN    =>  BIUO_adr,
-    M_DATA_IN   =>  BIUO_din,
-    M_DATA_OUT  =>  BIUO_dout,
-    
-    S0_WR_OUT   =>  MMU_wr,
-
-    S0_ADR_OUT  =>  MMU_adr,
-    S0_DATA_OUT =>  MMU_din,
-    S0_DATA_in  =>  MMU_dout,
-    
-    S1_WR_OUT   =>  WS_wr,
-
-    S1_ADR_OUT  =>  WS_adr,
-    S1_DATA_OUT =>  WS_din,
-    S1_DATA_in  =>  WS_dout
+    CONF_AUTO_IN  =>  ena_auto,
+    LED_OUT       =>  LED_AUTO_OUT,
+        
+    A_RD_OUT      =>  BIUI_rd,
+    A_WR_OUT      =>  BIUI_wr,
+        
+    A_ADR_OUT     =>  BIUI_adr,
+    A_DATA_OUT    =>  BIUI_din,
+    A_DATA_IN     =>  BIUI_dout,
+        
+    B_WR_OUT      =>  WS_wr,
+        
+    B_ADR_OUT     =>  WS_adr,
+    B_DATA_OUT    =>  WS_din,
+    B_DATA_IN     =>  WS_dout
   );
 
-  
   WS_Encoder: WS_Encoder_top port map(
     CLK_IN      =>  CLK_IN,
-    RST_IN      =>  reset,
+    RST_IN      =>  sys_reset,
 
     WR_IN       =>  WS_wr,
 
-    ADR_IN      =>  WS_adr(7 downto 0),
+    ADR_IN      =>  WS_adr,
     DATA_IN     =>  WS_din,
     DATA_OUT    =>  WS_dout,
-
-    M_RD_OUT    =>  MMU_WS_rd,
-
-    M_ADR_OUT   =>  MMU_WS_adr,
-    M_DATA_IN   =>  MMU_WS_dta,
 
     PIXEL_OUT   =>  PIXEL_OUT
   );

@@ -285,13 +285,13 @@ begin
       if RST_IN = '1' then
         --Werte für 100 MHz
         cCSR        <=  (others=>'0');
-        cT1H_Steps  <=  std_logic_vector(to_unsigned(79, 8));
-        cT0H_Steps  <=  std_logic_vector(to_unsigned(39, 8));
-        cBitSteps   <=  std_logic_vector(to_unsigned(124, 8));
-        cRstCntL    <=  x"87";
-        cRstCntH    <=  x"13";
-        cLedCntL    <=  std_logic_vector(to_unsigned(255, 8));
-        cLedCntH    <=  '1';
+        cT1H_Steps  <=  (others=>'0');
+        cT0H_Steps  <=  (others=>'0');
+        cBitSteps   <=  (others=>'0');
+        cRstCntL    <=  (others=>'0');
+        cRstCntH    <=  (others=>'0');
+        cLedCntL    <=  (others=>'0');
+        cLedCntH    <=  '0';
       else
         cCSR        <=  nCSR;
         cT1H_Steps  <=  nT1H_Steps;
