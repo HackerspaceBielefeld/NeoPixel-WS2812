@@ -21,14 +21,11 @@ entity NeoPixel_top is
   port(
     --System clock
     CLK_IN          : in  std_logic;
+    RST_IN          : in  std_logic;
     
-    --Reset button, negative logic, needs synchronisation
-    RST_BTN_N_IN    : in  std_logic;
-    
-    --Config-Pins, negative logic, needs synchronisation
-    CONF_AUTO_N_IN  : in  std_logic;
-    
-    LED_AUTO_OUT    : out std_logic;
+    --Config-Pins, needs synchronisation
+    AUTO_SWITCH_IN  : in  std_logic;
+    AUTO_LED_OUT    : out std_logic;
 
     --SPI-lines
     CS_IN           : in  std_logic;
@@ -208,18 +205,16 @@ architecture RTL of NeoPixel_top is
   signal WS_dout    : std_logic_vector(7 downto 0);
   
   --Sync-Registers
-  signal sync_reset : std_logic;
   signal sync_auto  : std_logic;
   
 begin
 
+  sys_reset <=  RST_IN;
+  
   sync_in: process(CLK_IN)
   begin
     if rising_edge(CLK_IN) then
-      sync_reset  <=  not RST_BTN_N_IN;
-      sync_auto   <=  not CONF_AUTO_N_IN;
-      
-      sys_reset   <=  sync_reset;
+      sync_auto   <=  AUTO_SWITCH_IN;
       ena_auto    <=  sync_auto;
     end if;
   end process;
@@ -292,7 +287,7 @@ begin
     INT1_IN       =>  UART_int,
       
     CONF_AUTO_IN  =>  ena_auto,
-    LED_OUT       =>  LED_AUTO_OUT,
+    LED_OUT       =>  AUTO_LED_OUT,
         
     A_RD_OUT      =>  BIUI_rd,
     A_WR_OUT      =>  BIUI_wr,
