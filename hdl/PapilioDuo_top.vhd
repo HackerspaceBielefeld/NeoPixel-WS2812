@@ -133,6 +133,7 @@ SysClk_inst : PLL
     LOCKED => locked
   );
   
+pllRst      <=  '0';
 sysRst      <=  (not locked) or pllRst;
 AVR_RST_OUT <=  '0';
 
@@ -140,16 +141,12 @@ rstSync_tl: process(cBtnPre, rstSync)
 begin
   nBtnPre     <=  cBtnPre + 1;
   shiftEna    <=  '0';
-  pllRst      <=  '0';
   
   if cBtnPre = x"FF" then
     nBtnPre   <=  x"00";
     shiftEna  <=  '1';
   end if;
   
-  if rstSync /= "111111" then
-    pllRst    <=  '1';
-  end if;
 end process;
   
 rstSync_reg: process(sysClk)
