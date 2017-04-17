@@ -23,6 +23,8 @@ entity NeoPixel_top is
     CLK_IN          : in  std_logic;
     RST_IN          : in  std_logic;
     
+    RST_BTN_N_IN    : in  std_logic;
+    
     --Config-Pins, needs synchronisation
     AUTO_SWITCH_IN  : in  std_logic;
     AUTO_LED_OUT    : out std_logic;
@@ -205,17 +207,19 @@ architecture RTL of NeoPixel_top is
   signal WS_dout    : std_logic_vector(7 downto 0);
   
   --Sync-Registers
-  signal sync_auto  : std_logic;
+  signal sync_auto  : std_logic_vector(1 downto 0);
+  signal sync_rst   : std_logic_vector(1 downto 0);
   
 begin
 
-  sys_reset <=  RST_IN;
-  
+  sys_reset <=  RST_IN or (not sync_rst(1));
+  ena_auto  <=  sync_auto(1);
+
   sync_in: process(CLK_IN)
   begin
     if rising_edge(CLK_IN) then
-      sync_auto   <=  AUTO_SWITCH_IN;
-      ena_auto    <=  sync_auto;
+      sync_rst    <=  sync_rst(0) & RST_BTN_N_IN;
+      sync_auto   <=  sync_auto(0) & AUTO_SWITCH_IN;
     end if;
   end process;
   
