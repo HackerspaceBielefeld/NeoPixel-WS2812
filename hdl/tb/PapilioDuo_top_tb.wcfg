@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="C:/Users/Fki/Documents/NeoPixel/prj/PapilioDuo_top_tb_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="numeric_std" />
+            <top_module name="papilioduo_top_tb" />
+            <top_module name="pic_pkg" />
+            <top_module name="ram_pkg" />
+            <top_module name="std_logic_1164" />
+            <top_module name="std_logic_arith" />
+            <top_module name="std_logic_textio" />
+            <top_module name="std_logic_unsigned" />
+            <top_module name="textio" />
+            <top_module name="vcomponents" />
+            <top_module name="vital_primitives" />
+            <top_module name="vital_timing" />
+            <top_module name="vpkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="19" />
+   <wvobject fp_name="/papilioduo_top_tb/clk_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk_in</obj_property>
+      <obj_property name="ObjectShortName">clk_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/rst_btn_n_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst_btn_n_in</obj_property>
+      <obj_property name="ObjectShortName">rst_btn_n_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/auto_switch_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">auto_switch_in</obj_property>
+      <obj_property name="ObjectShortName">auto_switch_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/cs_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">cs_in</obj_property>
+      <obj_property name="ObjectShortName">cs_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/sclk_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">sclk_in</obj_property>
+      <obj_property name="ObjectShortName">sclk_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/mosi_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mosi_in</obj_property>
+      <obj_property name="ObjectShortName">mosi_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/rxd_in" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rxd_in</obj_property>
+      <obj_property name="ObjectShortName">rxd_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/auto_led_out" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">auto_led_out</obj_property>
+      <obj_property name="ObjectShortName">auto_led_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/miso_out" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">miso_out</obj_property>
+      <obj_property name="ObjectShortName">miso_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/txd_out" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">txd_out</obj_property>
+      <obj_property name="ObjectShortName">txd_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/pixel_out" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">pixel_out</obj_property>
+      <obj_property name="ObjectShortName">pixel_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/avr_rst_out" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">avr_rst_out</obj_property>
+      <obj_property name="ObjectShortName">avr_rst_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/clk_in_period" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">clk_in_period</obj_property>
+      <obj_property name="ObjectShortName">clk_in_period</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/uut/locked" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">locked</obj_property>
+      <obj_property name="ObjectShortName">locked</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/uut/pllrst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">pllrst</obj_property>
+      <obj_property name="ObjectShortName">pllrst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/uut/sysrst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">sysrst</obj_property>
+      <obj_property name="ObjectShortName">sysrst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/uut/sysclk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">sysclk</obj_property>
+      <obj_property name="ObjectShortName">sysclk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/uut/rstsync" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rstsync[5:0]</obj_property>
+      <obj_property name="ObjectShortName">rstsync[5:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/papilioduo_top_tb/uut/cbtnpre" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">cbtnpre[7:0]</obj_property>
+      <obj_property name="ObjectShortName">cbtnpre[7:0]</obj_property>
+   </wvobject>
+</wave_config>
