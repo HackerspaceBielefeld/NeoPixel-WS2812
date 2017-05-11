@@ -43,7 +43,7 @@ entity PapilioDuo_top is
     AUTO_SWITCH_IN  : in  std_logic;
     
     --Diagnosis LEDs
-    LED_RST_OUT     : out std_logic;
+    --LED_RST_OUT     : out std_logic;
     LED_AUTO_OUT    : out std_logic
     --LED_RX_OUT      : out std_logic;
     --LED_RUNNING_OUT : out std_logic
@@ -53,23 +53,10 @@ end PapilioDuo_top;
 
 architecture RTL of PapilioDuo_top is
 
-component PLL
-port
- (-- Clock in ports
-  CLK_IN1           : in     std_logic;
-  -- Clock out ports
-  CLK_OUT1          : out    std_logic;
-  -- Status and control signals
-  RESET             : in     std_logic;
-  LOCKED            : out    std_logic
- );
-end component;
-
 component NeoPixel_top is
   port(
     --System clock
     CLK_IN          : in  std_logic;
-    RST_IN          : in  std_logic;
     
     RST_BTN_N_IN    : in  std_logic;
     
@@ -92,19 +79,12 @@ component NeoPixel_top is
   );
 end component;
 
-signal sysClk   : std_logic;
-signal sysRst   : std_logic;
-signal locked   : std_logic;
-
 begin
-
-LED_RST_OUT   <=  locked;
 
 Engine: NeoPixel_top 
   port map(
     --System clock
-    CLK_IN          => sysClk,
-    RST_IN          => sysRst,
+    CLK_IN          => CLK_IN,
     
     RST_BTN_N_IN    => RST_BTN_N_IN,
     --Config-Pins, negative logic, needs synchronisation
@@ -124,19 +104,7 @@ Engine: NeoPixel_top
     --Data signal to NeoPixel-LED
     PIXEL_OUT       => PIXEL_OUT
   );
-
-SysClk_inst : PLL
-  port map
-  (-- Clock in ports
-    CLK_IN1 => CLK_IN,
-    -- Clock out ports
-    CLK_OUT1 => sysClk,
-    -- Status and control signals
-    RESET  => '0',
-    LOCKED => locked
-  );
   
-sysRst      <=  not locked;
-AVR_RST_OUT <=  '0';
+AVR_RST_OUT <=  '1'; --AVR active
 
 end RTL;

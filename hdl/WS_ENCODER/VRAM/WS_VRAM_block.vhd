@@ -1,13 +1,14 @@
 ----------------------------------------------------------------------------------
 -- Engineer:        Florian Kiemes
 --
--- Design Name:     
--- Module Name:     
--- Target Devices:  Spartan 6 / Artix 7
--- Tool versions:   ISE 14.7
--- Description:
--- 
+-- Version:         0.1
 --
+-- Design Name:     WS_VRAM_block
+-- Module Name:     WS_ENCODER
+-- Target Devices:  Spartan 6 / Artix 7
+-- Tool versions:   ISE 14.7 / Vivado
+-- Description:
+-- Implements the VRAM for the LED-controller as dual-port block ram.
 --
 -- Revision:
 -- Revision 0.1 File created

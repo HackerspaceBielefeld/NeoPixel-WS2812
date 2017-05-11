@@ -21,7 +21,6 @@ entity NeoPixel_top is
   port(
     --System clock
     CLK_IN          : in  std_logic;
-    RST_IN          : in  std_logic;
     
     RST_BTN_N_IN    : in  std_logic;
     
@@ -47,6 +46,16 @@ end NeoPixel_top;
 
 architecture RTL of NeoPixel_top is
 
+  component syscon is
+    port(
+      EXT_CLK_IN    : in  std_logic;
+      RST_BTN_N_IN  : in  std_logic;
+      
+      CLK_O         : out std_logic;
+      RST_O         : out std_logic
+    );
+  end component;
+  
   component UART_top is
     port(
       --System clock and master reset
@@ -207,26 +216,36 @@ architecture RTL of NeoPixel_top is
   signal WS_dout    : std_logic_vector(7 downto 0);
   
   --Sync-Registers
-  signal sync_auto  : std_logic_vector(1 downto 0);
-  signal sync_rst   : std_logic_vector(1 downto 0);
+  signal sync_auto   : std_logic_vector(1 downto 0);
+  
+  -- wisbone signals
+  
+  -- syscon signals
+  signal wb_clk     : std_logic;
+  signal wb_rst     : std_logic;
   
 begin
 
-  sys_reset <=  RST_IN or (not sync_rst(1));
+  syscon_inst: syscon port map(
+    EXT_CLK_IN    =>  CLK_IN,
+    RST_BTN_N_IN  =>  RST_BTN_N_IN,
+    CLK_O         =>  wb_clk,
+    RST_O         =>  wb_rst
+  );
+
   ena_auto  <=  sync_auto(1);
 
-  sync_in: process(CLK_IN)
+  sync_in: process(wb_clk)
   begin
-    if rising_edge(CLK_IN) then
-      sync_rst    <=  sync_rst(0) & RST_BTN_N_IN;
+    if rising_edge(wb_clk) then
       sync_auto   <=  sync_auto(0) & AUTO_SWITCH_IN;
     end if;
   end process;
   
   --Instatiations of submodules
   UART: UART_top port map(
-    CLK_IN    =>  CLK_IN,
-    RST_IN    =>  sys_reset,
+    CLK_IN    =>  wb_clk,
+    RST_IN    =>  wb_rst,
     
     RD_IN     =>  UART_rd,
     WR_IN     =>  UART_wr,
@@ -242,8 +261,8 @@ begin
   );
   
   SPI: SPI_top port map(
-    CLK_IN    =>  CLK_IN,
-    RST_IN    =>  sys_reset,
+    CLK_IN    =>  wb_clk,
+    RST_IN    =>  wb_rst,
     
     RD_IN     =>  SPI_rd,
     WR_IN     =>  SPI_wr,
@@ -284,8 +303,8 @@ begin
   );
   
   Controller: Controller_top port map(
-    CLK_IN        =>  CLK_IN,
-    RST_IN        =>  sys_reset,
+    CLK_IN        =>  wb_clk,
+    RST_IN        =>  wb_rst,
       
     INT0_IN       =>  SPI_int,
     INT1_IN       =>  UART_int,
@@ -308,8 +327,8 @@ begin
   );
 
   WS_Encoder: WS_Encoder_top port map(
-    CLK_IN      =>  CLK_IN,
-    RST_IN      =>  sys_reset,
+    CLK_IN      =>  wb_clk,
+    RST_IN      =>  wb_rst,
 
     WR_IN       =>  WS_wr,
 

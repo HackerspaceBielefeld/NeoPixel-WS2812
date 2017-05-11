@@ -1,13 +1,14 @@
 ----------------------------------------------------------------------------------
 -- Engineer:        Florian Kiemes
 --
--- Design Name:     
--- Module Name:     
--- Target Devices:  Spartan 6 / Artix 7
--- Tool versions:   ISE 14.7
--- Description:
--- 
+-- Version:         0.1
 --
+-- Design Name:     WS_Engine
+-- Module Name:     WS_ENCODER
+-- Target Devices:  Spartan 6 / Artix 7
+-- Tool versions:   ISE 14.7 / Vivado
+-- Description:
+-- Encodes the memory output to the WS2812 protocol.
 --
 -- Revision:
 -- Revision 0.1 File created
@@ -17,7 +18,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity WS_engine is
+entity WS_Engine is
   port(
     CLK_IN      : in  std_logic;
     RST_IN      : in  std_logic;
@@ -36,9 +37,9 @@ entity WS_engine is
     
     PIXEL_OUT   : out std_logic
   );
-end WS_engine;
+end WS_Engine;
 
-architecture RTL of WS_engine is
+architecture RTL of WS_Engine is
 
   signal cLedCnt, nLedCnt : unsigned(8 downto 0);
   signal ledCnt           : unsigned(8 downto 0);
