@@ -56,19 +56,78 @@ architecture RTL of NeoPixel_top is
     );
   end component;
   
+  component intercon_1M_4S is
+    generic(
+      ADR_WIDTH   : positive range 3 to positive'High := 8;
+      DAT_WIDTH   : positive := 8
+    );
+    port(
+      -- from master
+      CYC_I   : in  std_logic;
+      STB_I   : in  std_logic;
+      WE_I    : in  std_logic;
+      ADR_I   : in  std_logic_vector(ADR_WIDTH - 1 downto 0);
+      DAT_I   : in  std_logic_vector(DAT_WIDTH - 1 downto 0);
+      
+      DAT_O   : out std_logic_vector(DAT_WIDTH - 1 downto 0);
+      ACK_O   : out std_logic;
+      
+      -- to slave0
+      CYC0_O  : out std_logic;
+      STB0_O  : out std_logic;
+      WE0_O   : out std_logic;
+      ADR0_O  : out std_logic_vector(ADR_WIDTH - 3 downto 0); -- because of predecoding
+      DAT0_O  : out std_logic_vector(DAT_WIDTH - 1 downto 0);
+      
+      DAT0_I  : in  std_logic_vector(DAT_WIDTH - 1 downto 0);
+      ACK0_I  : in  std_logic;
+      
+      -- to slave1
+      CYC1_O  : out std_logic;
+      STB1_O  : out std_logic;
+      WE1_O   : out std_logic;
+      ADR1_O  : out std_logic_vector(ADR_WIDTH - 3 downto 0); -- because of predecoding
+      DAT1_O  : out std_logic_vector(DAT_WIDTH - 1 downto 0);
+      
+      DAT1_I  : in  std_logic_vector(DAT_WIDTH - 1 downto 0);
+      ACK1_I  : in  std_logic;
+      
+      -- to slave2
+      CYC2_O  : out std_logic;
+      STB2_O  : out std_logic;
+      WE2_O   : out std_logic;
+      ADR2_O  : out std_logic_vector(ADR_WIDTH - 3 downto 0); -- because of predecoding
+      DAT2_O  : out std_logic_vector(DAT_WIDTH - 1 downto 0);
+      
+      DAT2_I  : in  std_logic_vector(DAT_WIDTH - 1 downto 0);
+      ACK2_I  : in  std_logic;
+      
+      -- to slave3
+      CYC3_O  : out std_logic;
+      STB3_O  : out std_logic;
+      WE3_O   : out std_logic;
+      ADR3_O  : out std_logic_vector(ADR_WIDTH - 3 downto 0); -- because of predecoding
+      DAT3_O  : out std_logic_vector(DAT_WIDTH - 1 downto 0);
+      
+      DAT3_I  : in  std_logic_vector(DAT_WIDTH - 1 downto 0);
+      ACK3_I  : in  std_logic
+    );
+  end component;
+  
   component UART_top is
     port(
       --System clock and master reset
-      CLK_IN      : in  std_logic;
-      RST_IN      : in  std_logic;
+      CLK_I       : in  std_logic;
+      RST_I       : in  std_logic;
       
       --Bus interface
-      RD_IN       : in  std_logic;
-      WR_IN       : in  std_logic;
-      
-      ADR_IN      : in  std_logic_vector(2 downto 0);
-      DATA_IN     : in  std_logic_vector(7 downto 0);
-      DATA_OUT    : out std_logic_vector(7 downto 0);
+      CYC_I       : in  std_logic;
+      STB_I       : in  std_logic;
+      WE_I        : in  std_logic;
+      ADR_I       : in  std_logic_vector(2 downto 0);
+      DAT_I       : in  std_logic_vector(7 downto 0);
+      DAT_O       : out std_logic_vector(7 downto 0);
+      ACK_O       : out std_logic;
       
       --UART-lines
       RXD_IN      : in  std_logic;
@@ -82,16 +141,17 @@ architecture RTL of NeoPixel_top is
   component SPI_top is
     port(
       --System clock and master reset
-      CLK_IN      : in  std_logic;
-      RST_IN      : in  std_logic;
+      CLK_I       : in  std_logic;
+      RST_I       : in  std_logic;
       
       --Bus interface
-      RD_IN       : in  std_logic;
-      WR_IN       : in  std_logic;
-      
-      ADR_IN      : in  std_logic_vector(2 downto 0);
-      DATA_IN     : in  std_logic_vector(7 downto 0);
-      DATA_OUT    : out std_logic_vector(7 downto 0);
+      CYC_I       : in  std_logic;
+      STB_I       : in  std_logic;
+      WE_I        : in  std_logic;
+      ADR_I       : in  std_logic_vector(2 downto 0);
+      DAT_I       : in  std_logic_vector(7 downto 0);
+      DAT_O       : out std_logic_vector(7 downto 0);
+      ACK_O       : out std_logic;
       
       --SPI-lines
       CS_IN       : in  std_logic;
@@ -101,34 +161,6 @@ architecture RTL of NeoPixel_top is
       
       --Interrupt line
       INT_OUT     : out std_logic
-    );
-  end component;
-  
-  component BIUI_top is
-    port(
-      --Master bus interface
-      M_RD_IN     : in  std_logic;
-      M_WR_IN     : in  std_logic;
-      
-      M_ADR_IN    : in  std_logic_vector(3 downto 0);
-      M_DATA_IN   : in  std_logic_vector(7 downto 0);
-      M_DATA_OUT  : out std_logic_vector(7 downto 0);
-      
-      --Bus interface for slave 0 (SPI)
-      S0_RD_OUT   : out std_logic;
-      S0_WR_OUT   : out std_logic;
-  
-      S0_ADR_OUT  : out std_logic_vector(2 downto 0);
-      S0_DATA_OUT : out std_logic_vector(7 downto 0);
-      S0_DATA_in  : in  std_logic_vector(7 downto 0);
-      
-      --Bus interface for slave 1 (UART)
-      S1_RD_OUT   : out std_logic;
-      S1_WR_OUT   : out std_logic;
-  
-      S1_ADR_OUT  : out std_logic_vector(2 downto 0);
-      S1_DATA_OUT : out std_logic_vector(7 downto 0);
-      S1_DATA_in  : in  std_logic_vector(7 downto 0) 
     );
   end component;
 
@@ -224,6 +256,42 @@ architecture RTL of NeoPixel_top is
   signal wb_clk     : std_logic;
   signal wb_rst     : std_logic;
   
+  -- master signals
+  signal wb_ma_cyc  : std_logic;
+  signal wb_ma_stb  : std_logic;  
+  signal wb_ma_we   : std_logic;  
+  signal wb_ma_adr  : std_logic_vector(7 downto 0);  
+  signal wb_ma_dat_i: std_logic_vector(7 downto 0);  
+  signal wb_ma_dat_o: std_logic_vector(7 downto 0);  
+  signal wb_ma_ack  : std_logic;
+  
+  --slave0
+  signal wb_s0_cyc  : std_logic;
+  signal wb_s0_stb  : std_logic;  
+  signal wb_s0_we   : std_logic;  
+  signal wb_s0_adr  : std_logic_vector(5 downto 0);  
+  signal wb_s0_dat_i: std_logic_vector(7 downto 0);  
+  signal wb_s0_dat_o: std_logic_vector(7 downto 0);  
+  signal wb_s0_ack  : std_logic;
+  
+  --slave1
+  signal wb_s1_cyc  : std_logic;
+  signal wb_s1_stb  : std_logic;  
+  signal wb_s1_we   : std_logic;  
+  signal wb_s1_adr  : std_logic_vector(5 downto 0);  
+  signal wb_s1_dat_i: std_logic_vector(7 downto 0);  
+  signal wb_s1_dat_o: std_logic_vector(7 downto 0);  
+  signal wb_s1_ack  : std_logic;
+  
+  --slave2
+  signal wb_s2_cyc  : std_logic;
+  signal wb_s2_stb  : std_logic;  
+  signal wb_s2_we   : std_logic;  
+  signal wb_s2_adr  : std_logic_vector(5 downto 0);  
+  signal wb_s2_dat_i: std_logic_vector(7 downto 0);  
+  signal wb_s2_dat_o: std_logic_vector(7 downto 0);  
+  signal wb_s2_ack  : std_logic;
+  
 begin
 
   syscon_inst: syscon port map(
@@ -231,6 +299,62 @@ begin
     RST_BTN_N_IN  =>  RST_BTN_N_IN,
     CLK_O         =>  wb_clk,
     RST_O         =>  wb_rst
+  );
+  
+  intercon_inst: intercon_1M_4S generic map(
+    ADR_WIDTH => 8,
+    DAT_WIDTH => 8
+  )
+  port map(
+    -- from master
+    CYC_I     => wb_ma_cyc,
+    STB_I     => wb_ma_stb,
+    WE_I      => wb_ma_we,
+    ADR_I     => wb_ma_adr,
+    DAT_I     => wb_ma_dat_o,
+
+    DAT_O     => wb_ma_dat_i,
+    ACK_O     => wb_ma_ack,
+    
+    -- to slave0
+    CYC0_O    => wb_s0_cyc,
+    STB0_O    => wb_s0_stb,
+    WE0_O     => wb_s0_we,
+    ADR0_O    => wb_s0_adr,
+    DAT0_O    => wb_s0_dat_i,
+
+    DAT0_I    => wb_s0_dat_o,
+    ACK0_I    => wb_s0_ack,
+    
+    -- to slave1
+    CYC1_O    => wb_s1_cyc,
+    STB1_O    => wb_s1_stb,
+    WE1_O     => wb_s1_we,
+    ADR1_O    => wb_s1_adr,
+    DAT1_O    => wb_s1_dat_i,
+
+    DAT1_I    => wb_s1_dat_o,
+    ACK1_I    => wb_s1_ack,
+    
+    -- to slave2
+    CYC2_O    => wb_s2_cyc,
+    STB2_O    => wb_s2_stb,
+    WE2_O     => wb_s2_we,
+    ADR2_O    => wb_s2_adr,
+    DAT2_O    => wb_s2_dat_i,
+
+    DAT2_I    => wb_s2_dat_o,
+    ACK2_I    => wb_s2_ack,
+    
+    -- to slave3
+    CYC3_O    => open,
+    STB3_O    => open,
+    WE3_O     => open,
+    ADR3_O    => open,
+    DAT3_O    => open,
+
+    DAT3_I    => "--------",
+    ACK3_I    => '-'
   );
 
   ena_auto  <=  sync_auto(1);

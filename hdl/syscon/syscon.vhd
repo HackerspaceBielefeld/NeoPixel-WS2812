@@ -59,13 +59,13 @@ SysClk_inst : PLL
   );
 
   CLK_O   <=  sysClk;
+  RST_O   <=  (not locked) or (not rstSr(1));
   
   sync: process(sysClk)
   begin
     if rising_edge(sysClk) then
       if locked = '1' then
         rstSr   <=  rstSr(0) & RST_BTN_N_IN;
-        RST_O   <=  (not rstSr(1)) and (not locked);
       end if;
     end if;
   end process;
