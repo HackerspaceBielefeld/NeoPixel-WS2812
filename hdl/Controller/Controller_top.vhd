@@ -19,39 +19,37 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity Controller_top is
   port(
-    CLK_IN      : in  std_logic;
-    RST_IN      : in  std_logic;
+    --System clock and master reset
+    CLK_I       : in  std_logic;
+    RST_I       : in  std_logic;
     
+    --Bus interface (Master!)
+    CYC_O       : out std_logic;
+    STB_O       : out std_logic;
+    WE_O        : out std_logic;
+    ADR_O       : out std_logic_vector(7 downto 0);
+    DAT_O       : out std_logic_vector(7 downto 0);
+    DAT_I       : in  std_logic_vector(7 downto 0);
+    ACK_I       : in  std_logic;
+    
+    --Interrups from COMs
     INT0_IN     : in  std_logic;
     INT1_IN     : in  std_logic;
     
     CONF_AUTO_IN: in  std_logic;
-    LED_OUT     : out std_logic;
-    
-    A_RD_OUT    : out std_logic;
-    A_WR_OUT    : out std_logic;
-    
-    A_ADR_OUT   : out std_logic_vector(3 downto 0);
-    A_DATA_OUT  : out std_logic_vector(7 downto 0);
-    A_DATA_IN   : in  std_logic_vector(7 downto 0);
-    
-    B_WR_OUT    : out std_logic;
-    
-    B_ADR_OUT   : out std_logic_vector(3 downto 0);
-    B_DATA_OUT  : out std_logic_vector(7 downto 0);
-    B_DATA_IN   : in  std_logic_vector(7 downto 0) 
+    LED_OUT     : out std_logic
   );
 end Controller_top;
 
 architecture RTL of Controller_top is
 
   --Werte für 100 MHz
-  constant SPI_DATA   : std_logic_vector(3 downto 0)  := x"0";
+  constant SPI_DAT    : std_logic_vector(7 downto 0)  := x"40";
   constant SPI_CSR    : std_logic_vector(3 downto 0)  := x"1";
   
   constant SPI_CONF   : std_logic_vector(7 downto 0)  := x"0B";
   
-  constant UART_DATA  : std_logic_vector(3 downto 0)  := x"8";
+  constant UART_DAT   : std_logic_vector(7 downto 0)  := x"00";
   constant UART_CSR   : std_logic_vector(3 downto 0)  := x"9";
   constant UART_BRL   : std_logic_vector(3 downto 0)  := x"A";
   constant UART_BRH   : std_logic_vector(3 downto 0)  := x"B";
@@ -88,163 +86,130 @@ architecture RTL of Controller_top is
   constant WS_LEDL_C  : std_logic_vector(7 downto 0)  := x"95";
   constant WS_LEDH_C  : std_logic_vector(7 downto 0)  := x"00";
 
+  constant RD_CMD     : std_logic_vector(7 downto 0)  := x"5A";
 
-  type FSM_STATE is (ST_CONF0, ST_CONF1, ST_CONF2, ST_CONF3, ST_CONF4, 
-                     ST_CONF5, ST_CONF6, ST_CONF7, ST_CONF8, ST_IDLE,
-                     ST_SET_DTA);
+  type FSM_STATE is (IDLE, GET_CMD, WAIT_ADR, GET_ADR, WAIT_CNT, GET_CNT, DECODE_CMD);
   signal cState, nState : FSM_STATE;
   
-  signal cSerialDta, nSerialDta : std_logic_vector(7 downto 0);
+  signal cAdr, nAdr : std_logic_vector(7 downto 0);
+  signal cDta, nDta : std_logic_vector(7 downto 0);
+  signal cCnt, nCnt : std_logic_vector(7 downto 0);
+  signal cCmd, nCmd : std_logic_vector(7 downto 0);
+  signal cSrc, nSrc : std_logic;
 
 begin
 
   LED_OUT <=  CONF_AUTO_IN;
   
-  logic_p: process(cState, cSerialDta, CONF_AUTO_IN, INT0_IN, INT1_IN, A_DATA_IN)
+  logic_p: process(cState, cAdr, cDta, cCnt, cCmd, cSrc, DAT_I, ACK_I, 
+                   INT0_IN, INT1_IN, CONF_AUTO_IN)
   begin
-    A_RD_OUT    <=  '0';
-    A_WR_OUT    <=  '0';
-        
-    A_ADR_OUT   <=  x"0";
-    A_DATA_OUT  <=  x"00";
-        
-    B_WR_OUT    <=  '0';
-    B_ADR_OUT   <=  x"0";
-    B_DATA_OUT  <=  x"00";
-  
-    nState      <=  cState;
-    nSerialDta  <=  cSerialDta;
+    nAdr    <=  cAdr;
+    nDta    <=  cDta;
+    nCnt    <=  cCnt;
+    nCmd    <=  cCmd;
+    nSrc    <=  cSrc;
+    nState  <=  cState;
+    
+    CYC_O   <=  '0';
+    STB_O   <=  '0';
+    WE_O    <=  '0';
+    ADR_O   <=  x"00";
+    DAT_O   <=  x"00";
     
     case cState is
-      when ST_CONF0 =>
-        A_WR_OUT    <=  '1';
-        A_ADR_OUT   <=  SPI_CSR;
-        A_DATA_OUT  <=  SPI_CONF;
-        
-        B_WR_OUT    <=  '1';
-        B_ADR_OUT   <=  WS_LEDH;
-        B_DATA_OUT  <=  WS_LEDH_C;
-        
-        nState      <=  ST_CONF1;
-    
-      when ST_CONF1 =>
-        A_WR_OUT    <=  '1';
-        A_ADR_OUT   <=  UART_IER;
-        A_DATA_OUT  <=  UART_IER_C;
-        
-        B_WR_OUT    <=  '1';
-        B_ADR_OUT   <=  WS_LEDL;
-        B_DATA_OUT  <=  WS_LEDL_C;
-        
-        nState      <=  ST_CONF2;
-      
-      when ST_CONF2 =>
-        A_WR_OUT    <=  '1';
-        A_ADR_OUT   <=  UART_BRH;
-        A_DATA_OUT  <=  UART_BRH_C;
-        
-        B_WR_OUT    <=  '1';
-        B_ADR_OUT   <=  WS_RSTH;
-        B_DATA_OUT  <=  WS_RSTH_C;
-        
-        nState      <=  ST_CONF3;
-        
-      when ST_CONF3 =>
-        A_WR_OUT    <=  '1';
-        A_ADR_OUT   <=  UART_BRL;
-        A_DATA_OUT  <=  UART_BRL_C;
-        
-        B_WR_OUT    <=  '1';
-        B_ADR_OUT   <=  WS_RSTL;
-        B_DATA_OUT  <=  WS_RSTL_C;
-        
-        nState      <=  ST_CONF4;
-        
-      when ST_CONF4 =>
-        A_WR_OUT    <=  '1';
-        A_ADR_OUT   <=  UART_CSR;
-        A_DATA_OUT  <=  UART_CSR_C;
-        
-        B_WR_OUT    <=  '1';
-        B_ADR_OUT   <=  WS_TBIT;
-        B_DATA_OUT  <=  WS_TBIT_C;
-        
-        nState      <=  ST_CONF5;
-        
-      when ST_CONF5 =>
-        A_WR_OUT    <=  '1';
-        A_ADR_OUT   <=  UART_CSR;
-        A_DATA_OUT  <=  UART_CSR_C;
-        
-        B_WR_OUT    <=  '1';
-        B_ADR_OUT   <=  WS_T0H;
-        B_DATA_OUT  <=  WS_T0H_C;
-        
-        nState      <=  ST_CONF6;
-        
-      when ST_CONF6 =>
-        B_WR_OUT    <=  '1';
-        B_ADR_OUT   <=  WS_T0H;
-        B_DATA_OUT  <=  WS_T0H_C;
-        
-        nState      <=  ST_CONF7;
-        
-      when ST_CONF7 =>
-        B_WR_OUT    <=  '1';
-        B_ADR_OUT   <=  WS_T1H;
-        B_DATA_OUT  <=  WS_T1H_C;
-        
-        nState      <=  ST_CONF8;
-        
-      when ST_CONF8 =>
-        B_WR_OUT    <=  '1';
-        B_ADR_OUT   <=  WS_CSR;
-        B_DATA_OUT  <=  WS_CSR_C;
-        
-        nState      <=  ST_IDLE;
-        
-      when ST_IDLE =>
-        if CONF_AUTO_IN = '1' then
-          if INT0_IN = '1' then
-            A_ADR_OUT   <=  SPI_DATA;
-            A_RD_OUT    <=  '1';
-            nSerialDta  <=  A_DATA_IN;
-            
-            nState      <=  ST_SET_DTA;
-          end if;
-          
-          if INT1_IN = '1' then
-            A_ADR_OUT   <=  UART_DATA;
-            A_RD_OUT    <=  '1';
-            nSerialDta  <=  A_DATA_IN;
-            
-            nState      <=  ST_SET_DTA;
-          end if;
-        else
-          
+      when IDLE =>
+        if INT0_IN = '1' then
+          nSrc    <=  '0';
+          nState  <=  GET_CMD;
         end if;
         
-      when ST_SET_DTA =>
-        B_ADR_OUT   <=  WS_LDAT;
-        B_WR_OUT    <=  '1';
-        B_DATA_OUT  <=  cSerialDta;
+        if INT1_IN = '1' then
+          nSrc    <=  '1';
+          nState  <=  GET_CMD;
+        end if;
         
-        nState      <=  ST_IDLE;
-      when others =>
-      
+      when GET_CMD =>
+        CYC_O   <=  '1';
+        STB_O   <=  '1';
+        if cSrc = '1' then
+          ADR_O   <=  SPI_DAT;
+        else
+          ADR_O   <=  UART_DAT;
+        end if;
+        
+        if ACK_I = '1' then
+          nCmd    <=  DAT_I;
+          nState  <=  WAIT_ADR;
+        end if;
+        
+      when WAIT_ADR =>
+        if (cSrc = '0' and INT0_IN = '1') or (cSrc = '1' and INT1_IN = '1') then
+          nState  <=  GET_ADR;
+        end if;
+        
+      when GET_ADR =>
+        CYC_O   <=  '1';
+        STB_O   <=  '1';
+        if cSrc = '1' then
+          ADR_O   <=  SPI_DAT;
+        else
+          ADR_O   <=  UART_DAT;
+        end if;
+        
+        if ACK_I = '1' then
+          nAdr    <=  DAT_I;
+          nState  <=  WAIT_CNT;
+        end if;
+        
+      when WAIT_CNT =>
+        if (cSrc = '0' and INT0_IN = '1') or (cSrc = '1' and INT1_IN = '1') then
+          nState  <=  GET_CNT;
+        end if;
+        
+      when GET_CNT =>
+        CYC_O   <=  '1';
+        STB_O   <=  '1';
+        if cSrc = '1' then
+          ADR_O   <=  SPI_DAT;
+        else
+          ADR_O   <=  UART_DAT;
+        end if;
+        
+        if ACK_I = '1' then
+          nCnt    <=  DAT_I;
+          nState  <=  DECODE_CMD;
+        end if;
+        
+      when DECODE_CMD =>
+        if cCmd = RD_CMD then
+          --read
+        else
+          --write / getData
+        end if;
+      when others=>
     end case;
   end process;
-
-  regs_p: process(CLK_IN)
+  
+  regs: process(CLK_I)
   begin
-    if rising_edge(CLK_IN) then
-      if RST_IN = '1' then
-        cState      <=  ST_CONF0;
+    if rising_edge(CLK_I) then
+      if RST_I = '1' then
+        cAdr    <=  (others=>'0');
+        cDta    <=  (others=>'0');
+        cCnt    <=  (others=>'0');
+        cCmd    <=  (others=>'0');
+        cSrc    <=  '0';
+        cState  <=  IDLE;
       else
-        cState      <=  nState;
-        cSerialDta  <=  nSerialDta;
+        cAdr    <=  nAdr;
+        cDta    <=  nDta;
+        cCnt    <=  nCnt;
+        cCmd    <=  nCmd;
+        cSrc    <=  nSrc;
+        cState  <=  nState;
       end if;
     end if;
   end process;
-
+  
 end RTL;

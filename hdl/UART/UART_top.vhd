@@ -36,6 +36,7 @@
 --    2   RDNEIE  - Receiver data not empty interrupt enable.
 --
 -- Revision:
+-- Revision 0.2 Wisbone-interface
 -- Revision 0.1 File created
 ----------------------------------------------------------------------------------
 
@@ -45,20 +46,25 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity UART_top is
   port(
-    CLK_IN    : in  std_logic;
-    RST_IN    : in  std_logic;
+    --System clock and master reset
+    CLK_I       : in  std_logic;
+    RST_I       : in  std_logic;
     
-    RD_IN     : in  std_logic;
-    WR_IN     : in  std_logic;
+    --Bus interface
+    CYC_I       : in  std_logic;
+    STB_I       : in  std_logic;
+    WE_I        : in  std_logic;
+    ADR_I       : in  std_logic_vector(2 downto 0);
+    DAT_I       : in  std_logic_vector(7 downto 0);
+    DAT_O       : out std_logic_vector(7 downto 0);
+    ACK_O       : out std_logic;
     
-    ADR_IN    : in  std_logic_vector(2 downto 0);
-    DATA_IN   : in  std_logic_vector(7 downto 0);
-    DATA_OUT  : out std_logic_vector(7 downto 0);
+    --UART-lines
+    RXD_IN      : in  std_logic;
+    TXD_OUT     : out std_logic;
     
-    RXD_IN    : in  std_logic;
-    TXD_OUT   : out std_logic;
-    
-    INT_OUT   : out std_logic
+    --Interrupt line
+    INT_OUT     : out std_logic
   );
 end UART_top;
 
@@ -124,8 +130,8 @@ begin
   
   receiver: UART_rxd 
     port map(
-      CLK_IN      =>  CLK_IN,
-      RST_IN      =>  RST_IN,
+      CLK_IN      =>  CLK_I,
+      RST_IN      =>  RST_I,
       RX_ENA_IN   =>  rxd_ena,
       BAUDRATE_IN =>  baudrate,
       RXD_IN      =>  RXD_IN,
@@ -136,8 +142,8 @@ begin
     
   transmitter: UART_txd
     port map(
-      CLK_IN      =>  CLK_IN,
-      RST_IN      =>  RST_IN,
+      CLK_IN      =>  CLK_I,
+      RST_IN      =>  RST_I,
       TX_ENA_IN   =>  txd_ena,
       DTA_RDY_IN  =>  txd_dta_rdy,
       DTA_IN      =>  cTDR,
@@ -153,9 +159,10 @@ begin
   txd_ena     <=  cCSR(1) and cCSR(0);
   txd_dta_rdy <=  not cCSR(3);
   
-  decoder: process(ADR_IN, RD_IN, WR_IN, DATA_IN, rxd_idle, rxd_wr,
+  decoder: process(CYC_I, STB_I, ADR_I, WE_I, DAT_I, rxd_idle, rxd_wr,
                    rxd_dta, cTDR, cRDR, cCSR, cBLR, cBHR, cIER, txd_idle, txd_rd)
   begin
+    ACK_O   <= '0';
     
     nTDR  <=  cTDR;
     nCSR  <=  cCSR;
@@ -180,64 +187,67 @@ begin
       nCSR(3)  <=  '1';
     end if;
     
-    DATA_OUT  <=  "--------";
+    DAT_O     <=  "--------";
     
-    case ADR_IN is
-      when "000" =>
-        DATA_OUT  <=  cRDR;
+    if CYC_I = '1' and STB_I = '1' then
+      ACK_O   <=  '1';
+    
+      case ADR_I is
+        when "000" =>
+          
+          DAT_O  <=  cRDR;
         
-        if RD_IN = '1' then
-          nCSR(4) <=  '0';
-          nCSR(7) <=  '0';
-        end if;
+          if WE_I = '1' then
+            nTDR    <=  DAT_I;
+            nCSR(3) <=  '0';
+          else
+            nCSR(4) <=  '0';
+            nCSR(7) <=  '0';
+          end if;
         
-        if WR_IN = '1' then
-          nTDR    <=  DATA_IN;
-          nCSR(3) <=  '0';
-        end if;
+        when "001" =>
+          DAT_O  <=  cCSR;
         
-      when "001" =>
-        DATA_OUT  <=  cCSR;
+          if WE_I = '1' then
+            nCSR(2 downto 0) <=  DAT_I(2 downto 0);
+          end if;
         
-        if WR_IN = '1' then
-          nCSR(2 downto 0) <=  DATA_IN(2 downto 0);
-        end if;
+        when "010" =>
+          DAT_O  <=  cBLR;
         
-      when "010" =>
-        DATA_OUT  <=  cBLR;
+          if WE_I = '1' then
+            nBLR    <=  DAT_I;
+          end if;
         
-        if WR_IN = '1' then
-          nBLR    <=  DATA_IN;
-        end if;
+        when "011" =>
+          DAT_O  <=  cBHR;
         
-      when "011" =>
-        DATA_OUT  <=  cBHR;
+          if WE_I = '1' then
+            nBHR    <=  DAT_I;
+          end if;
         
-        if WR_IN = '1' then
-          nBHR    <=  DATA_IN;
-        end if;
+        when "100" =>
+          DAT_O  <=  "00000" & cIER;
         
-      when "100" =>
-        DATA_OUT  <=  "00000" & cIER;
+          if WE_I = '1' then
+            nIER    <=  DAT_I(2 downto 0);
+          end if;
         
-        if WR_IN = '1' then
-          nIER    <=  DATA_IN(2 downto 0);
-        end if;
-        
-      when others=>
-    end case;
+        when others=>
+      end case;
+    end if;
   end process;
 
-  regs: process(CLK_IN)
+  regs: process(CLK_I)
   begin
-    if rising_edge(CLK_IN) then
-      if RST_IN = '1' then
+    if rising_edge(CLK_I) then
+      if RST_I = '1' then
         cTDR  <=  (others=>'0');
         cRDR  <=  (others=>'0');
-        cCSR  <=  (others=>'0');
-        cBLR  <=  (others=>'0');
-        cBHR  <=  (others=>'0');
-        cIER  <=  (others=>'0');
+        cCSR  <=  x"07"; --enable uart
+        cBLR  <=  x"63"; --867d -> 100 MHz zu 115200 Baud
+        cBHR  <=  x"03";
+        cIER  <=  "101"; --enable interrupts
       else
         cTDR  <=  nTDR;
         cRDR  <=  nRDR;

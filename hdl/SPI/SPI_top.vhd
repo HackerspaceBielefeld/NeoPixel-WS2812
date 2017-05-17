@@ -35,21 +35,26 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity SPI_top is
   port(
-    CLK_IN      : in  std_logic;
-    RST_IN      : in  std_logic;
+    --System clock and master reset
+    CLK_I       : in  std_logic;
+    RST_I       : in  std_logic;
     
-    RD_IN       : in  std_logic;
-    WR_IN       : in  std_logic;
+    --Bus interface
+    CYC_I       : in  std_logic;
+    STB_I       : in  std_logic;
+    WE_I        : in  std_logic;
+    ADR_I       : in  std_logic_vector(0 downto 0);
+    DAT_I       : in  std_logic_vector(7 downto 0);
+    DAT_O       : out std_logic_vector(7 downto 0);
+    ACK_O       : out std_logic;
     
-    ADR_IN      : in  std_logic_vector(2 downto 0);
-    DATA_IN     : in  std_logic_vector(7 downto 0);
-    DATA_OUT    : out std_logic_vector(7 downto 0);
-    
+    --SPI-lines
     CS_IN       : in  std_logic;
     SCLK_IN     : in  std_logic;
     MOSI_IN     : in  std_logic;
     MISO_OUT    : out std_logic;
     
+    --Interrupt line
     INT_OUT     : out std_logic
   );
 end SPI_top;
@@ -93,8 +98,8 @@ architecture RTL of SPI_top is
 begin
 
   shifter_inst: SPI_shifter port map(
-    CLK_IN    =>  CLK_IN,
-    RST_IN    =>  RST_IN,
+    CLK_IN    =>  CLK_I,
+    RST_IN    =>  RST_I,
     ENA_IN    =>  shift_ena,
     LD_OUT    =>  shift_ld,
     ST_OUT    =>  shift_st,
@@ -113,9 +118,11 @@ begin
   
   INT_OUT   <=  cCSR(1) and ((cCSR(2) and cCSR(5)) or (cCSR(3) and cCSR(6)));
   
-  decoder: process(ADR_IN, DATA_IN, RD_IN, WR_IN, cCSR, cRDR, cTDR, shift_st, shift_ld, shift_rdr, shift_abrt)
+  decoder: process(CYC_I, STB_I, ADR_I, DAT_I, WE_I, cCSR, cRDR, cTDR, 
+                   shift_st, shift_ld, shift_rdr, shift_abrt)
   begin
-    DATA_OUT  <=  "--------";
+    DAT_O   <=  "--------";
+    ACK_O   <=  '0';
     
     nCSR      <=  cCSR;
     nRDR      <=  cRDR;
@@ -138,37 +145,39 @@ begin
       nCSR(4) <=  '1';
     end if;
     
-    case ADR_IN(0) is
-      when '0' =>
-        DATA_OUT  <=  cRDR;
-        if RD_IN = '1' then
-          nCSR(6) <=  '0';
-          nCSR(7) <=  '0';
-        end if;
+    if CYC_I = '1' and STB_I = '1' then
+      ACK_O   <=  '1';
+      
+      case ADR_I(0) is
+        when '0' =>
+          DAT_O  <=  cRDR;
+          
+          if WE_I = '1' then
+            nTDR    <=  DAT_I;
+            nCSR(5) <=  '0';
+          else
+            nCSR(6) <=  '0';
+            nCSR(7) <=  '0';
+          end if;
         
-        if WR_IN = '1' then
-          nTDR    <=  DATA_IN;
-          nCSR(5) <=  '0';
-        end if;
+        when '1' =>
+          DAT_O  <=  cCSR;
+          if WE_I = '1' then
+            nCSR(3 downto 0)  <= DAT_I(3 downto 0);
+          end if;
         
-      when '1' =>
-        DATA_OUT  <=  cCSR;
-        if WR_IN = '1' then
-          nCSR(3 downto 0)  <= DATA_IN(3 downto 0);
-        end if;
-        
-      when others =>
-    end case;
-    
+        when others =>
+      end case;
+    end if;
   end process;
   
-  regs: process(CLK_IN)
+  regs: process(CLK_I)
   begin
-    if rising_edge(CLK_IN) then
-      if RST_IN = '1' then
+    if rising_edge(CLK_I) then
+      if RST_I = '1' then
         cRDR  <=  (others=>'0');
         cTDR  <=  (others=>'0');
-        cCSR  <=  (others=>'0');
+        cCSR  <=  x"0F";
         cCsSr <=  (others=>'0');
       else
         cRDR  <=  nRDR;

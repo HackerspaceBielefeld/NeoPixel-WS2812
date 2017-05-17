@@ -46,15 +46,20 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity WS_Encoder_top is
   port(
-    CLK_IN      : in  std_logic;
-    RST_IN      : in  std_logic;
+    --System clock and master reset
+    CLK_I       : in  std_logic;
+    RST_I       : in  std_logic;
     
-    WR_IN       : in  std_logic;
+    --Bus interface
+    CYC_I       : in  std_logic;
+    STB_I       : in  std_logic;
+    WE_I        : in  std_logic;
+    ADR_I       : in  std_logic_vector(3 downto 0);
+    DAT_I       : in  std_logic_vector(7 downto 0);
+    DAT_O       : out std_logic_vector(7 downto 0);
+    ACK_O       : out std_logic;
     
-    ADR_IN      : in  std_logic_vector(3 downto 0);
-    DATA_IN     : in  std_logic_vector(7 downto 0);
-    DATA_OUT    : out std_logic_vector(7 downto 0);
-    
+    --LED data out
     PIXEL_OUT   : out std_logic
   );
 end WS_Encoder_top;
@@ -145,8 +150,8 @@ begin
   ledCnt  <=  cLedCntH & cLedCntL;
   
   encoder: WS_engine port map(
-    CLK_IN      =>  CLK_IN,
-    RST_IN      =>  RST_IN,
+    CLK_IN      =>  CLK_I,
+    RST_IN      =>  RST_I,
     ENA_IN      =>  cCSR(0),
     BUSY_OUT    =>  engineBusy,
     T1H_IN      =>  cT1H_Steps,
@@ -160,8 +165,8 @@ begin
   );
   
   vram: WS_VRAM_Control port map(
-    CLK_IN        => CLK_IN,
-    RST_IN        => RST_IN,
+    CLK_IN        => CLK_I,
+    RST_IN        => RST_I,
     COL_MODE_IN   => cCSR(3 downto 2),
     V_ADR_RST_IN  => vAdrRst,
     V_ADR_EN_IN   => vAdrEn,
@@ -169,21 +174,22 @@ begin
     V_ADR_OUT     => vAdrOut,
     P_ADR_RST_IN  => pAdrRst,
     P_ADR_EN_IN   => pAdrEn,
-    P_ADR_IN      => DATA_IN,
+    P_ADR_IN      => DAT_I,
     P_ADR_OUT     => pAdrOut,
     V_DATA_EN_IN  => vDataEn,
-    V_DATA_IN     => DATA_IN,
+    V_DATA_IN     => DAT_I,
     P_DATA_EN_IN  => pDataEn,
-    P_DATA_IN     => DATA_IN,
+    P_DATA_IN     => DAT_I,
     LED_ADR_IN    => ledAdr,
     LED_DATA_OUT  => ledData
   );
   
   adr_dec: process(cCSR, cT1H_Steps, cT0H_Steps, cBitSteps, cRstCntL, cRstCntH, 
-                   cLedCntL, cLedCntH, WR_IN, ADR_IN, DATA_IN, engineBusy, pAdrOut, vAdrOut)
+                   cLedCntL, cLedCntH, WE_I, ADR_I, DAT_I, engineBusy, pAdrOut, 
+                   CYC_I, STB_I, vAdrOut)
   begin
-  
-    DATA_OUT    <=  "00" & cCSR;
+    ACK_O       <=  '0';
+    DAT_O       <=  "00" & cCSR;
   
     nCSR        <=  cCSR;
     nCSR(1)     <=  engineBusy;
@@ -204,96 +210,99 @@ begin
     pDataEn     <=  '0';
     vAdrIn      <=  vAdrOut;
     
-    
-    case ADR_IN is
-      when x"0"  =>
-        if WR_IN = '1' then
-          nCSR(5 downto 2)  <=  DATA_IN(5 downto 2);
-          nCSR(0)           <=  DATA_IN(0);
-        end if;
+    if CYC_I = '1' and STB_I = '1' then
+      ACK_O   <=  '1';
+      
+      case ADR_I is
+        when x"0"  =>
+          if WE_I = '1' then
+            nCSR(5 downto 2)  <=  DAT_I(5 downto 2);
+            nCSR(0)           <=  DAT_I(0);
+          end if;
         
-      when x"1"  =>
-        DATA_OUT  <=  cT1H_Steps;
-        if WR_IN = '1' then
-          nT1H_Steps  <=  DATA_IN;
-        end if;
+        when x"1"  =>
+          DAT_O     <=  cT1H_Steps;
+          if WE_I = '1' then
+            nT1H_Steps  <=  DAT_I;
+          end if;
         
-      when x"2"  =>
-        DATA_OUT  <=  cT0H_Steps;
-        if WR_IN = '1' then
-          nT0H_Steps  <=  DATA_IN;
-        end if;
-        
-      when x"3"  =>
-        DATA_OUT  <=  cBitSteps;
-        if WR_IN = '1' then
-          nBitSteps   <=  DATA_IN;
-        end if;
-        
-      when x"4"  =>
-        DATA_OUT  <=  cRstCntL;
-        if WR_IN = '1' then
-          nRstCntL    <=  DATA_IN;
-        end if;
-        
-      when x"5"  =>
-        DATA_OUT  <=  cRstCntH;
-        if WR_IN = '1' then
-          nRstCntH    <=  DATA_IN;
-        end if;
-        
-      when x"6"  =>
-        DATA_OUT  <=  cLedCntL;
-        if WR_IN = '1' then
-          nLedCntL    <=  DATA_IN;
-        end if;
-        
-      when x"7"  =>
-        DATA_OUT  <=  "0000000" & cLedCntH;
-        if WR_IN = '1' then
-          nLedCntH    <=  DATA_IN(0);
-        end if;
-        
-      when x"8"  =>
-        vDataEn <=  WR_IN;
-        
-      when x"9"  =>
-        DATA_OUT  <= vAdrOut(7 downto 0);
-        if WR_IN = '1' then
-          vAdrIn  <= vAdrOut(8) & DATA_IN;
-          vAdrEn  <= '1';
-        end if;
-        
-      when x"A"  =>
-        DATA_OUT  <= "0000000" & vAdrOut(8);
-        if WR_IN = '1' then
-          vAdrIn  <= DATA_IN(0) & vAdrOut(7 downto 0);
-          vAdrEn  <= '1';
-        end if;
-        
-      when x"B"  =>
-        DATA_OUT  <= pAdrOut;
-        pAdrEn    <= WR_IN;
-        
-      when x"C"  =>
-        pDataEn <=  WR_IN;
-        
-      when others =>
-    end case;
+        when x"2"  =>
+          DAT_O     <=  cT0H_Steps;
+          if WE_I = '1' then
+            nT0H_Steps  <=  DAT_I;
+          end if;
+          
+        when x"3"  =>
+          DAT_O     <=  cBitSteps;
+          if WE_I = '1' then
+            nBitSteps   <=  DAT_I;
+          end if;
+          
+        when x"4"  =>
+          DAT_O     <=  cRstCntL;
+          if WE_I = '1' then
+            nRstCntL    <=  DAT_I;
+          end if;
+          
+        when x"5"  =>
+          DAT_O       <=  cRstCntH;
+          if WE_I = '1' then
+            nRstCntH    <=  DAT_I;
+          end if;
+          
+        when x"6"  =>
+          DAT_O     <=  cLedCntL;
+          if WE_I = '1' then
+            nLedCntL    <=  DAT_I;
+          end if;
+          
+        when x"7"  =>
+          DAT_O     <=  "0000000" & cLedCntH;
+          if WE_I = '1' then
+            nLedCntH    <=  DAT_I(0);
+          end if;
+          
+        when x"8"  =>
+          vDataEn <=  WE_I;
+          
+        when x"9"  =>
+          DAT_O     <= vAdrOut(7 downto 0);
+          if WE_I = '1' then
+            vAdrIn  <= vAdrOut(8) & DAT_I;
+            vAdrEn  <= '1';
+          end if;
+          
+        when x"A"  =>
+          DAT_O     <= "0000000" & vAdrOut(8);
+          if WE_I = '1' then
+            vAdrIn  <= DAT_I(0) & vAdrOut(7 downto 0);
+            vAdrEn  <= '1';
+          end if;
+          
+        when x"B"  =>
+          DAT_O   <= pAdrOut;
+          pAdrEn    <= WE_I;
+          
+        when x"C"  =>
+          pDataEn <=  WE_I;
+          
+        when others =>
+      end case;
+    end if;
   end process;
 
-  regs: process(CLK_IN)
+  regs: process(CLK_I)
   begin
-    if rising_edge(CLK_IN) then
-      if RST_IN = '1' then
+    if rising_edge(CLK_I) then
+      if RST_I = '1' then
         --Werte für 100 MHz
-        cCSR        <=  (others=>'0');
-        cT1H_Steps  <=  (others=>'0');
-        cT0H_Steps  <=  (others=>'0');
-        cBitSteps   <=  (others=>'0');
-        cRstCntL    <=  (others=>'0');
-        cRstCntH    <=  (others=>'0');
-        cLedCntL    <=  (others=>'0');
+        cCSR        <=  "110001";
+        cT1H_Steps  <=  x"4F";
+        cT0H_Steps  <=  x"27";
+        cBitSteps   <=  x"7C";
+        cRstCntL    <=  x"87";
+        cRstCntH    <=  x"13";
+        cLedCntL    <=  x"95";
         cLedCntH    <=  '0';
       else
         cCSR        <=  nCSR;
