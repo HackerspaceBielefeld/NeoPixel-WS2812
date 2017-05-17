@@ -88,12 +88,13 @@ architecture RTL of Controller_top is
 
   constant RD_CMD     : std_logic_vector(7 downto 0)  := x"5A";
 
-  type FSM_STATE is (IDLE, GET_CMD, WAIT_ADR, GET_ADR, WAIT_CNT, GET_CNT, DECODE_CMD);
+  type FSM_STATE is (IDLE, GET_CMD, WAIT_ADR, GET_ADR, WAIT_CNT, GET_CNT, DECODE_CMD,
+                     READ_DAT, GET_DAT, WRITE_BACK, WRITE_TO);
   signal cState, nState : FSM_STATE;
   
   signal cAdr, nAdr : std_logic_vector(7 downto 0);
   signal cDta, nDta : std_logic_vector(7 downto 0);
-  signal cCnt, nCnt : std_logic_vector(7 downto 0);
+  signal cCnt, nCnt : unsigned(7 downto 0);
   signal cCmd, nCmd : std_logic_vector(7 downto 0);
   signal cSrc, nSrc : std_logic;
 
@@ -144,7 +145,9 @@ begin
         end if;
         
       when WAIT_ADR =>
-        if (cSrc = '0' and INT0_IN = '1') or (cSrc = '1' and INT1_IN = '1') then
+        if cCmd /= x"A5" and cCmd /= x"5A" then
+          nState  <=  IDLE;
+        elsif (cSrc = '0' and INT0_IN = '1') or (cSrc = '1' and INT1_IN = '1') then
           nState  <=  GET_ADR;
         end if;
         
@@ -177,16 +180,76 @@ begin
         end if;
         
         if ACK_I = '1' then
-          nCnt    <=  DAT_I;
+          nCnt    <=  unsigned(DAT_I);
           nState  <=  DECODE_CMD;
         end if;
         
       when DECODE_CMD =>
         if cCmd = RD_CMD then
-          --read
+          nState    <= READ_DAT;
         else
-          --write / getData
+          nState    <=  GET_DAT;
         end if;
+        
+      when GET_DAT  =>
+        CYC_O   <=  '1';
+        STB_O   <=  '1';
+        if cSrc = '1' then
+          ADR_O   <=  SPI_DAT;
+        else
+          ADR_O   <=  UART_DAT;
+        end if;
+        
+        if ACK_I = '1' then
+          nDta    <=  DAT_I;
+          nState  <=  WRITE_TO;
+        end if;
+        
+      when WRITE_TO =>
+        CYC_O   <=  '1';
+        STB_O   <=  '1';
+        ADR_O   <=  cAdr;
+        WE_O    <=  '1';
+        DAT_O   <=  cDta;
+        
+        if ACK_I = '1' then
+          if cCnt = x"00" then
+            nState  <=  IDLE;
+          else
+            nCnt    <=  cCnt - 1;
+            nState  <=  GET_DAT;
+          end if;
+        end if;
+        
+      when READ_DAT =>
+        CYC_O   <=  '1';
+        STB_O   <=  '1';
+        ADR_O   <=  cAdr;
+        if ACK_I = '1' then
+          nDta    <=  DAT_I;
+          nState  <=  WRITE_BACK;
+        end if;
+        
+      when WRITE_BACK =>
+        CYC_O   <=  '1';
+        STB_O   <=  '1';
+        WE_O    <=  '1';
+        if cSrc = '1' then
+          ADR_O   <=  SPI_DAT;
+        else
+          ADR_O   <=  UART_DAT;
+        end if;
+        DAT_O   <=  cDta;
+        
+        if ACK_I = '1' then
+          if cCnt = x"00" then
+            nState  <=  IDLE;
+          else
+            nCnt    <=  cCnt - 1;
+            nState  <=  READ_DAT;
+          end if;
+        end if;
+        
       when others=>
     end case;
   end process;
