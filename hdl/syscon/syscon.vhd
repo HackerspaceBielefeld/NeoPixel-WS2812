@@ -1,14 +1,15 @@
 ----------------------------------------------------------------------------------
 -- Engineer:        Florian Kiemes
 --
--- Version:         0.1
+-- Version:         1.0
 --
 -- Design Name:     Syscon
 -- Module Name:     WS_ENCODER
 -- Target Devices:  Spartan 6 / Artix 7
 -- Tool versions:   ISE 14.7 / Vivado
 -- Description:
--- Encapsulates the PLL and the sychronisation for RST_BTN_IN.
+-- Encapsulates the IP CORE PLL and provides the internal clock (100MHz from 32MHz)
+-- and the system RESET signal (active high).
 --
 -- Revision:
 -- Revision 0.1 File created
@@ -31,43 +32,33 @@ architecture RTL of Syscon is
 
 component PLL
 port
-  (-- Clock in ports
-    CLK_IN1           : in     std_logic;
-    -- Clock out ports
-    CLK_OUT1          : out    std_logic;
-    -- Status and control signals
-    RESET             : in     std_logic;
-    LOCKED            : out    std_logic
-  );
+ (-- Clock in ports
+  CLK_IN           : in     std_logic;
+  -- Clock out ports
+  CLK_OUT          : out    std_logic;
+  -- Status and control signals
+  RST_IN           : in     std_logic;
+  CLK_VALID_OUT    : out    std_logic
+ );
 end component;
 
-signal sysClk : std_logic;
-signal locked : std_logic;
-signal rstSr  : std_logic_vector(1 downto 0);
+signal clk_valid : std_logic;
+signal ext_reset : std_logic;
 
 begin
 
 SysClk_inst : PLL
   port map
   (-- Clock in ports
-    CLK_IN1 => EXT_CLK_IN,
+    CLK_IN  		=> EXT_CLK_IN,
     -- Clock out ports
-    CLK_OUT1 => sysClk,
+    CLK_OUT 		=> CLK_O,
     -- Status and control signals
-    RESET  => '0',
-    LOCKED => locked
+    RST_IN 			=> ext_reset,
+    CLK_VALID_OUT => clk_valid
   );
-
-  CLK_O   <=  sysClk;
-  RST_O   <=  (not locked) or (not rstSr(1));
   
-  sync: process(sysClk)
-  begin
-    if rising_edge(sysClk) then
-      if locked = '1' then
-        rstSr   <=  rstSr(0) & RST_BTN_N_IN;
-      end if;
-    end if;
-  end process;
+  ext_reset <=	(not RST_BTN_N_IN);
+  RST_O   <=  (not clk_valid);
   
 end RTL;

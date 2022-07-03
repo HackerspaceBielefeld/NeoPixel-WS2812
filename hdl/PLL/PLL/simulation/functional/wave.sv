@@ -105,8 +105,7 @@ group set -comment {}
 group clear 0 end
 
 group insert \
-   {nc::PLL_tb.RESET}    {nc::PLL_tb.LOCKED}
-
+   {nc::PLL_tb.RESET} 
 
 set id [waveform add -signals [list {nc::PLL_tb.COUNT} ]]
 

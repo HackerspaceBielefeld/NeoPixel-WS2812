@@ -76,7 +76,7 @@ port
   COUNT             : out std_logic;
   -- Status and control signals
   RESET             : in  std_logic;
-  LOCKED            : out std_logic
+  CLK_VALID         : out std_logic
  );
 end PLL_exdes;
 
@@ -88,8 +88,7 @@ architecture xilinx of PLL_exdes is
   constant C_W        : integer := 16;
 
 
-  -- When the clock goes out of lock, reset the counters
-  signal   locked_int : std_logic;
+  -- Reset for counters when lock status changes
   signal   reset_int  : std_logic                     := '0';
 
   -- Declare the clocks and counter
@@ -106,21 +105,18 @@ architecture xilinx of PLL_exdes is
 component PLL is
 port
  (-- Clock in ports
-  CLK_IN1           : in     std_logic;
+  CLK_IN           : in     std_logic;
   -- Clock out ports
-  CLK_OUT1          : out    std_logic;
+  CLK_OUT          : out    std_logic;
   -- Status and control signals
-  RESET             : in     std_logic;
-  LOCKED            : out    std_logic
+  RST_IN             : in     std_logic;
+  CLK_VALID_OUT         : out    std_logic
  );
 end component;
 
 begin
-  -- Alias output to internally used signal
-  LOCKED    <= locked_int;
-
-  -- When the clock goes out of lock, reset the counters
-  reset_int <= (not locked_int) or RESET or COUNTER_RESET;
+  -- Create reset for the counters
+  reset_int <= RESET or COUNTER_RESET;
 
 
  process (clk, reset_int) begin
@@ -143,12 +139,12 @@ begin
   clknetwork : PLL
   port map
    (-- Clock in ports
-    CLK_IN1            => CLK_IN1,
+    CLK_IN            => CLK_IN1,
     -- Clock out ports
-    CLK_OUT1           => clk_int,
+    CLK_OUT           => clk_int,
     -- Status and control signals
-    RESET              => RESET,
-    LOCKED             => locked_int);
+    RST_IN              => RESET,
+    CLK_VALID_OUT          => CLK_VALID);
 
   clk_n <= not clk;
   clkout_oddr : ODDR2

@@ -74,18 +74,18 @@ use unisim.vcomponents.all;
 entity PLL is
 port
  (-- Clock in ports
-  CLK_IN1           : in     std_logic;
+  CLK_IN           : in     std_logic;
   -- Clock out ports
-  CLK_OUT1          : out    std_logic;
+  CLK_OUT          : out    std_logic;
   -- Status and control signals
-  RESET             : in     std_logic;
-  LOCKED            : out    std_logic
+  RST_IN             : in     std_logic;
+  CLK_VALID_OUT         : out    std_logic
  );
 end PLL;
 
 architecture xilinx of PLL is
   attribute CORE_GENERATION_INFO : string;
-  attribute CORE_GENERATION_INFO of xilinx : architecture is "PLL,clk_wiz_v3_6,{component_name=PLL,use_phase_alignment=true,use_min_o_jitter=false,use_max_i_jitter=false,use_dyn_phase_shift=false,use_inclk_switchover=false,use_dyn_reconfig=false,feedback_source=FDBK_AUTO,primtype_sel=DCM_SP,num_out_clk=1,clkin1_period=31.25,clkin2_period=31.25,use_power_down=false,use_reset=true,use_locked=true,use_inclk_stopped=false,use_status=false,use_freeze=false,use_clk_valid=false,feedback_type=SINGLE,clock_mgr_type=AUTO,manual_override=false}";
+  attribute CORE_GENERATION_INFO of xilinx : architecture is "PLL,clk_wiz_v3_6,{component_name=PLL,use_phase_alignment=false,use_min_o_jitter=false,use_max_i_jitter=false,use_dyn_phase_shift=false,use_inclk_switchover=false,use_dyn_reconfig=false,feedback_source=FDBK_AUTO,primtype_sel=DCM_SP,num_out_clk=1,clkin1_period=31.25,clkin2_period=31.25,use_power_down=false,use_reset=true,use_locked=false,use_inclk_stopped=false,use_status=false,use_freeze=false,use_clk_valid=true,feedback_type=SINGLE,clock_mgr_type=AUTO,manual_override=false}";
 	  -- Input clock buffering / unused connectors
   signal clkin1            : std_logic;
   -- Output clock buffering
@@ -103,7 +103,7 @@ begin
   clkin1_buf : IBUFG
   port map
    (O => clkin1,
-    I => CLK_IN1);
+    I => CLK_IN);
 
 
   -- Clocking primitive
@@ -120,7 +120,7 @@ begin
     CLKIN_DIVIDE_BY_2     => FALSE,
     CLKIN_PERIOD          => 31.25,
     CLKOUT_PHASE_SHIFT    => "NONE",
-    CLK_FEEDBACK          => "1X",
+    CLK_FEEDBACK          => "NONE",
     DESKEW_ADJUST         => "SYSTEM_SYNCHRONOUS",
     PHASE_SHIFT           => 0,
     STARTUP_WAIT          => FALSE)
@@ -146,25 +146,23 @@ begin
    -- Other control and status signals
     LOCKED                => locked_internal,
     STATUS                => status_internal,
-    RST                   => RESET,
+    RST                   => RST_IN,
    -- Unused pin, tie low
     DSSEN                 => '0');
 
-  LOCKED                <= locked_internal;
+  CLK_VALID_OUT             <= ( locked_internal and ( ( not status_internal(2) ) and ( not status_internal(1) ) ) );
 
 
 
   -- Output buffering
   -------------------------------------
-  clkf_buf : BUFG
-  port map
-   (O => clkfb,
-    I => clk0);
+  -- no phase alignment active, connect to ground
+  clkfb <= '0';
 
 
   clkout1_buf : BUFG
   port map
-   (O   => CLK_OUT1,
+   (O   => CLK_OUT,
     I   => clkfx);
 
 

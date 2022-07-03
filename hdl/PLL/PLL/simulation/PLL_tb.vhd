@@ -91,7 +91,7 @@ architecture test of PLL_tb is
   signal COUNT         : std_logic;
   -- Status and control signals
   signal RESET         : std_logic := '0';
-  signal LOCKED        : std_logic;
+  signal CLK_VALID     : std_logic;
   signal COUNTER_RESET : std_logic := '0';
 --  signal defined to stop mti simulation without severity failure in the report
   signal end_of_sim : std_logic := '0';
@@ -111,7 +111,7 @@ port
   COUNT             : out std_logic;
   -- Status and control signals
   RESET             : in  std_logic;
-  LOCKED            : out std_logic
+  CLK_VALID         : out std_logic
  );
 end component;
 
@@ -160,7 +160,7 @@ begin
     RESET      <= '1';
     wait for (PER1*6);
     RESET      <= '0';
-    wait until LOCKED = '1';
+    wait until CLK_VALID = '1';
     COUNTER_RESET <= '1';
     wait for (PER1*20);
     COUNTER_RESET <= '0';
@@ -190,7 +190,7 @@ begin
     COUNT              => COUNT,
     -- Status and control signals
     RESET              => RESET,
-    LOCKED             => LOCKED);
+    CLK_VALID          => CLK_VALID);
 
 -- Freq Check 
 

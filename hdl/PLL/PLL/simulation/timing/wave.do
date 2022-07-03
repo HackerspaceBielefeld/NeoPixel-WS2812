@@ -55,7 +55,6 @@ add wave -noupdate -divider {Output clocks}
 add wave -noupdate /PLL_tb/clk_in1
 add wave -noupdate /PLL_tb/count
 add wave -noupdate /PLL_tb/counter_reset
-add wave -noupdate /PLL_tb/locked
 add wave -noupdate /PLL_tb/reset
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {3223025 ps} 0}

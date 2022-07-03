@@ -67,12 +67,12 @@
 component PLL
 port
  (-- Clock in ports
-  CLK_IN1           : in     std_logic;
+  CLK_IN           : in     std_logic;
   -- Clock out ports
-  CLK_OUT1          : out    std_logic;
+  CLK_OUT          : out    std_logic;
   -- Status and control signals
-  RESET             : in     std_logic;
-  LOCKED            : out    std_logic
+  RST_IN             : in     std_logic;
+  CLK_VALID_OUT         : out    std_logic
  );
 end component;
 
@@ -83,10 +83,10 @@ end component;
 your_instance_name : PLL
   port map
    (-- Clock in ports
-    CLK_IN1 => CLK_IN1,
+    CLK_IN => CLK_IN,
     -- Clock out ports
-    CLK_OUT1 => CLK_OUT1,
+    CLK_OUT => CLK_OUT,
     -- Status and control signals
-    RESET  => RESET,
-    LOCKED => LOCKED);
+    RST_IN  => RST_IN,
+    CLK_VALID => CLK_VALID);
 -- INST_TAG_END ------ End INSTANTIATION Template ------------

@@ -11,8 +11,10 @@ Delivering associated files for 'PLL'...
 WARNING:sim - Component clk_wiz_v3_6 does not have a valid model name for VHDL
    synthesis
 Delivering EJava files for 'PLL'...
-Delivered 3 files into directory E:/Projects/NeoPixel/hdl/PLL/tmp/_cg/PLL
-Delivered 1 file into directory E:/Projects/NeoPixel/hdl/PLL/tmp/_cg/PLL
+Delivered 3 files into directory
+C:/Users/Fki/Documents/NeoPixel-WS2812/hdl/PLL/tmp/_cg/PLL
+Delivered 1 file into directory
+C:/Users/Fki/Documents/NeoPixel-WS2812/hdl/PLL/tmp/_cg/PLL
 Generating ASY schematic symbol...
 Loading device for application Rf_Device from file '6slx9.nph' in environment
 C:\Xilinx\14.7\ISE_DS\ISE\.
@@ -21,13 +23,18 @@ Generating SYM schematic symbol for 'PLL'...
 Generating ISE project...
 XCO file found: PLL.xco
 XMDF file found: PLL_xmdf.tcl
-Adding PLL.asy -view all -origin_type imported
-Adding PLL.ucf -view all -origin_type created
-Adding PLL.vhd -view all -origin_type created
+Adding C:/Users/Fki/Documents/NeoPixel-WS2812/hdl/PLL/tmp/_cg/PLL.asy -view all
+-origin_type imported
+Adding C:/Users/Fki/Documents/NeoPixel-WS2812/hdl/PLL/tmp/_cg/PLL.ucf -view all
+-origin_type created
+Adding C:/Users/Fki/Documents/NeoPixel-WS2812/hdl/PLL/tmp/_cg/PLL.vhd -view all
+-origin_type created
 INFO:HDLCompiler:1061 - Parsing VHDL file
-   "E:/Projects/NeoPixel/hdl/PLL/tmp/_cg/PLL.vhd" into library work
+   "C:/Users/Fki/Documents/NeoPixel-WS2812/hdl/PLL/tmp/_cg/PLL.vhd" into library
+   work
 INFO:ProjectMgmt - Parsing design hierarchy completed successfully.
-Adding PLL.vho -view all -origin_type imported
+Adding C:/Users/Fki/Documents/NeoPixel-WS2812/hdl/PLL/tmp/_cg/PLL.vho -view all
+-origin_type imported
 INFO:TclTasksC:2116 - The automatic calculation of top has been turned-off.
    Please set the new top explicitly by running the "project set top" command.
    To re-calculate the new top automatically, set the "Auto Implementation Top"

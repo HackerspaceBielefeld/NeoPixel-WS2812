@@ -1,3 +1,5 @@
 *.wcfg
 /prj/working
 /prj/iseconfig
+/hdl/PLL/tmp
+/hdl/PLL/_xmsgs
