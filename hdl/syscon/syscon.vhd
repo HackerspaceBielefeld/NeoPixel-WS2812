@@ -18,11 +18,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity Syscon is 
+entity Syscon is
   port(
     EXT_CLK_IN    : in  std_logic;
     RST_BTN_N_IN  : in  std_logic;
-    
+
     CLK_O         : out std_logic;
     RST_O         : out std_logic
   );
@@ -49,16 +49,16 @@ begin
 
 SysClk_inst : PLL
   port map
-  (-- Clock in ports
-    CLK_IN  		=> EXT_CLK_IN,
+  ( -- Clock in ports
+    CLK_IN          => EXT_CLK_IN,
     -- Clock out ports
-    CLK_OUT 		=> CLK_O,
+    CLK_OUT         => CLK_O,
     -- Status and control signals
-    RST_IN 			=> ext_reset,
+    RST_IN          => ext_reset,
     CLK_VALID_OUT => clk_valid
   );
-  
-  ext_reset <=	(not RST_BTN_N_IN);
+
+  ext_reset <=  (not RST_BTN_N_IN);
   RST_O   <=  (not clk_valid);
-  
+
 end RTL;
