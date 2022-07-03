@@ -8,11 +8,9 @@
 -- Target Devices:  Spartan 6 / Artix 7
 -- Tool versions:   ISE 14.7 / Vivado
 -- Description:
--- Encapsulates the IP CORE PLL and provides the internal clock (100MHz from 32MHz)
--- and the system RESET signal (active high).
---
--- Revision:
--- Revision 0.1 File created
+-- Encapsulates the PLL IP CORE and provides the internal clock (100MHz from 32MHz)
+-- and the system RESET signal. The external reset signal (RST_BTN_N_IN) is active
+-- low, the internal one (RST_O) active high.
 ----------------------------------------------------------------------------------
 
 library IEEE;
